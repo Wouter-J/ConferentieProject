@@ -3976,7 +3976,7 @@ function TAP(runner) {
  */
 
 function title(test) {
-  return test.fullTitle().replace(/#/g, '');
+  return test.fullTitle().replace(//g, '');
 }
 
 }); // module: reporters/tap.js
