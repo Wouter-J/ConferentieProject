@@ -16,31 +16,32 @@
      <div class="container">
         <div class="row">
          <div class="col-md-12">
-            <form role="form">
+            <form action="/newReservering" method="post">
+                
                     <div class="form-group">
-                    <label class="control-label" for="exampleInputEmail1">Voornaam</label>
-                    <input class="form-control" id="exampleInputEmail1" placeholder="Voornaam" type="text">
+                    <label class="control-label" for="Voornaam">Voornaam</label>
+                    <input class="form-control" id="naam" name="naam" placeholder="Voornaam" type="text">
                     </div>
-                    <div class="form-group"><label class="control-label" for="exampleInputEmail1">Tussenvoegsel</label><input class="form-control" id="exampleInputEmail1" placeholder="Enter email" type="text">
+                    <div class="form-group"><label class="control-label" for="Tussenvoegsel">Tussenvoegsel</label><input class="form-control" name="tussenvoegsel" placeholder="Enter email" type="text">
                     </div>
-                    <div class="form-group"><label class="control-label" for="exampleInputEmail1">Achternaam</label><input class="form-control" id="exampleInputEmail1" placeholder="Enter email" type="text">
+                    <div class="form-group"><label class="control-label" for="Achternaam">Achternaam</label><input class="form-control" name="achternaam" placeholder="Enter email" type="text">
                     </div>
-                    <div class="form-group"><label class="control-label" for="exampleInputEmail1">Email</label><input class="form-control" id="exampleInputEmail1" placeholder="Enter email" type="email">
+                    <div class="form-group"><label class="control-label" for="Email">Email</label><input class="form-control" name="email" placeholder="Enter email" type="email">
                     </div>
-                    <div class="form-group"><label class="control-label" for="exampleInputEmail1">Ticket Type:</label>
-                        <select id="typeTicket" name="typeTicket">
-                            <option value="1">Vrijdag</option>
-                            <option value="2">Zaterdag</option>
-                            <option value="3">Zondag</option>
-                            <option value="4">Parse-partout</option>
-                            <option value="5">Zaterdag & Zondag</option>
+                    <div class="form-group"><label class="control-label" for="ticketType">Ticket Type:</label>
+                        <select id="ticketType" name="ticketType">
+                            <option value="Vrijdag">Vrijdag</option>
+                            <option value="Zaterdag">Zaterdag</option>
+                            <option value="Zondag">Zondag</option>
+                            <option value="ParsePartout">Parse-partout</option>
+                            <option value="ZaterdagEnZondag">Zaterdag & Zondag</option>
                         </select>
                     </div>
                     <div class="form-group"><label class="control-label" for="exampleInputEmail1">Maaltijd Type</label>
-                        <select id="typeTicket" name="typeTicket">
-                            <option value="1">Lunch - Alle Dagen</option>
-                            <option value="2">Diner - Alleen Weekend</option>
-                            <option value="3">Geen Maaltijd</option>
+                        <select id="maaltijdType" name="maaltijdType">
+                            <option value="Geen">Geen Maaltijd</option>
+                            <option value="Lunch">Lunch - Alle Dagen</option>
+                            <option value="Diner">Diner - Alleen Weekend</option>   
                         </select>
                     </div>
                     <div class="form-group"><label class="control-label" for="exampleInputEmail1">Aantal Kaarten</label>                
