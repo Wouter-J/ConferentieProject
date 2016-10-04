@@ -1,19 +1,3 @@
-/*voorbeeld Mail.newMail = function (obj, callback) {
-    var query = "INSERT INTO `mailinglist` VALUES(?,?,?)";
-    mysql.connection(function (err, conn) {
-        if (err) {
-            return callback(err);
-        }
-        conn.query(query, [obj.email, obj.voornaam, obj.achternaam], function (err, rows) {
-            if (err) {
-                return callback(err,null);
-            } else{
-                return callback(null, rows);
-            }
-        });
-    })
-}; */
-
 var mysql = require('../db.js');
 
 var Reservering = function(){
@@ -32,39 +16,8 @@ var Reservering = function(){
     prijs = '';
     typeMaaltijd = '';
     tijdstip = '';
+    aantalvrij = '';
 }
-
-Reservering.newGebruiker = function(obj, callback) {
-    var query = "INSERT INTO `gebruiker` VALUES(NULL,?,?,?,?,?)";
-    mysql.connection(function (err, conn){
-        if(err) {
-            return callback(err);
-        }
-        conn.query(query, [obj.naam, obj.tussenvoegsel, obj.achternaam, obj.email, obj.rol], function (err, rows){
-            if(err){
-                return callback(err, null);
-            } else {
-                return callback(null, rows);
-            }
-        })
-    })
-};
-
-Reservering.getUserdata = function(obj, callback){
-    var query = "SELECT `idGebruiker` FROM Gebruiker WHERE email = ?;";
-    mysql.connection(function (err, conn){
-        if(err) {
-            return callback(err);
-        }
-        conn.query(query, [obj.email, obj.idGebruiker], function(err, rows){
-            console.log(obj.email);
-            var idGebruiker = rows[0].idGebruiker;
-            console.log(idGebruiker);
-            if(err) { return callback(err, null); }
-            else { return callback(null, idGebruiker);}
-        })
-    })
-};
 
 Reservering.newMaaltijd = function(obj, callback){
     var query = "INSERT INTO `maaltijd` VALUES(NULL,?,?)";
@@ -81,15 +34,54 @@ Reservering.newMaaltijd = function(obj, callback){
         })
     })
 };
+Reservering.checkFreeTickets = function(obj, callback){
+    var query = "SELECT aantalVrij from `Bestellingen` where ticketType = ?";
+    mysql.connection(function (err, conn) {
+        if (err) {
+            return callback(err);
+        }
+        conn.query(query, [obj.ticketType, obj.aantalVrij], function (err, rows) {
+            console.log("ticketType: " + obj.ticketType);
+            var aantalVrij = rows[0].aantalVrij;
+            console.log(aantalVrij);
+            if (err) {
+                console.log("err");
+                return callback(err,null);
+            } else{
+                return callback(null, aantalVrij);
+            }
+        });
+    })
+};
+
+Reservering.getTicketID = function(obj, callback){
+    //QUERY VERANDEREN, EMAIL ZAL MEERDERE SHIT TERUGSTUREN
+  var query = "SELECT ticketID from `tickets` where email = ?";
+    mysql.connection(function (err, conn) {
+        if (err) {
+            return callback(err);
+        }
+        conn.query(query, [obj.email, obj.ticketID], function (err, rows) {
+            console.log("Email: " + obj.email);
+            var ticketID = rows[0].ticketID;
+            console.log(ticketID);
+            if (err) {
+                console.log("err");
+                return callback(err,null);
+            } else{
+                return callback(null, ticketID);
+            }
+        });
+    })
+}; 
 
 Reservering.newOrder = function(obj, callback) {
-    var query = "INSERT INTO `Tickets` VALUES(NULL,?,?,?,?,?)";
+    var query = "INSERT INTO `Tickets` VALUES(NULL,?,?,?,?)";
         mysql.connection(function (err, conn){
         if(err) {
             return callback(err);
         }
-        conn.query(query, [obj.hashCode, obj.QRCode, obj.idGebruiker, obj.idMaaltijd, obj.ticketType], function (err, rows){
-            console.log(obj.idGebruiker);
+        conn.query(query, [obj.hashCode, obj.QRCode, obj.ticketType, obj.email], function (err, rows){
             if(err){
                 return callback(err, null);
             } else {

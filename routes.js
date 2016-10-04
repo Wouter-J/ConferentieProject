@@ -4,10 +4,22 @@ var router = express.Router();
 var sess;
 
 //Includes
+var passwordHash = require('password-hash');
 var Agenda  =require('./models/agenda.js');
+var Annuleren  =require('./models/annuleren.js');
 var Tijdslot = require('./models/tijdslot.js');
 var Spreker = require('./models/spreker.js');
 var Reservering = require('./models/reservering.js');
+
+//QR-Stuff
+var qr = require('qr-image');
+var fs = require('fs');
+
+router.get('/qr', function(req, res) {  
+  var code = qr.image(new Date().toString(), { type: 'svg' });
+  res.type('svg');
+  code.pipe(res);
+});
 //Index
 router.get('/', function (req, res) {
     res.render('partials/home.html.twig');
@@ -39,7 +51,14 @@ router.get('/inschrijvenSpreker', function(req,res){
 router.get('/tijdslot', function(req,res){
    res.render('partials/tijdslot.html.twig'); 
 });
-
+router.get('/annuleerReservering', function(req,res){
+   res.render('partials/ticketAnnuleren.html.twig'); 
+});
+/*
+router.get('/betalen', function(req,res){
+   res.render('partials/betalen.html.twig'); 
+});
+*/
 //Agenda
 router.get('/agenda', function (req, res) { //geen klant
     console.log("Agenda geactiveerd");
@@ -61,54 +80,96 @@ router.get('/agenda', function (req, res) { //geen klant
         })
 });
 //Tickets
+ //Reservering plaatsen
 router.post('/newReservering', function (req, res){
    var post = {
-       idGebruiker: '',
-       naam: req.body.naam,
-       tussenvoegsel: req.body.tussenvoegsel,
-       achternaam: req.body.achternaam,
        email: req.body.email,
-       rol: 'Bezoeker',
        ticketType: req.body.ticketType,
        maaltijdType: req.body.maaltijdType,
-       ticketID: '',
-       hashCode: 'mooieHash',
+       //ticketID: req.body.ticketID,
+       hashCode: passwordHash.generate(req.body.email + req.body.ticketType),
        QRCode: 'QR'
-   }; 
+    }; 
+    //var code = qr.image(passwordHash.generate(req.body.email + req.body.ticketType), { type: 'svg' });
+   // res.type('svg');
+    //code.pipe(res);
+    
     console.log(post);
-    Reservering.newGebruiker(post, function(err, callback){
+    Reservering.newOrder(post, function(err, callback){
         if(err) {
             console.log(err);
             //redirect toevoegen naar error
         } else {
-            console.log("Gebruiker toegevoegd");
-            Reservering.getUserdata(post, function(err, callback){
+            console.log("Ticket toegevoegd");
+                Reservering.getTicketID(post, function(err, callback){
                 if(err) {
                     console.log(err);
+                    //redirect toevoegen naar error
                 } else {
-                    sess = req.session;
-                    console.log(callback);
-                    sess.idGebruiker = callback;
-                    sess.ticketID = 1;
-                    console.log("Data opgehaald " + sess.idGebruiker);
+                   console.log("ticketID: " + callback);
+                   sess = req.session;
+                   sess.ticketID = callback;
+                   var post = {ticketID: sess.ticketID, maaltijdType: req.body.maaltijdType, ticketType: req.body.ticketType, aantalvrij: ''};
+                   console.log(sess.ticketID);
                         Reservering.newMaaltijd(post, function(err, callback){
                         if(err) {
                             console.log(err);
                             //redirect toevoegen naar error
                         } else {
-                            console.log("Maaltijd toegevoegd");
-                                Reservering.newOrder(post, function(err, callback){
+                            console.log("Maaltijd order toegevoegd");
+                            Reservering.checkFreeTickets(post, function(err, callback){
                                     if(err) {
                                         console.log(err);
                                         //redirect toevoegen naar error
                                     } else {
-                                        console.log("Order toegevoegd");
+                                        console.log("Tickets gechecked " + callback);
+                                        res.redirect('/betalen');
                                     }
-                                })
+                                })    
                         }
                     })
                 }
-            })
+            });
+        }
+    });
+});
+ //Betaling bevestigen
+router.get('/betalen', function(req, res){
+    console.log("Prijs Berekening");
+    res.render('partials/betalen.html.twig');
+    //var post = { ticketType: sess.ticketType }
+})
+router.post('/confirmOrder', function(req,res){
+    res.render('partials/sucess/betalingGelukt.html.twig');
+})
+
+ //Reservering annuleren
+router.post('/cancelReservering', function(req, res){
+       var post = {
+       email: req.body.email,
+       hashCode: req.body.hashCode,
+       QRCode: 'QR',
+    };
+    
+    console.log("CANCEL"); 
+    console.log(post);
+    Annuleren.zoekOrder(post, function(err, callback){
+        if(err) {
+            console.log(err);
+            //redirect toevoegen naar error
+        } else {
+            console.log("ticketID: " + callback);
+                   sess = req.session;
+                   sess.ticketID = callback;
+                   var post = {ticketID: sess.ticketID};
+                Annuleren.verwijderOrder(post, function(err, callback){
+                    if(err) {
+                        console.log(err);
+                    } else {
+                        console.log("Order destroy >.<");
+                        //VERWIJDER EN ERROR SCHERM TOEVOEGEN, OOK CHECK OF BESTAAT, ALS TICKET NIET BESTAAT DAN NIKS DOEN
+                    }
+                })
         }
     })
 });
@@ -116,11 +177,11 @@ router.post('/newReservering', function (req, res){
 //Spreker
 router.post('/newSpreker', function (req, res){
    var post = {
-       idSpreker: null,
+       //idSpreker: null,
        onderwerp: req.body.onderwerp,
        wensen: req.body.wensen,
-       voorkeurSloten: req.body.voorkeurSloten,
-       toegewezenSloten: req.body.toegewezenSloten,
+       //voorkeurSloten: req.body.voorkeurSloten,
+       //toegewezenSloten: req.body.toegewezenSloten,
        rol: 'Spreker',
        maaltijdType: req.body.maaltijdType,
        naam: req.body.naam,

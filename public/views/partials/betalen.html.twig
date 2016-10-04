@@ -1,0 +1,19 @@
+{% extends 'index.html.twig' %}
+
+{% block body %}
+    
+<html>
+<body>
+    <div class="section">
+     <div class="container">
+        <div class="row">
+         <div class="col-md-12">
+            <form action="/confirmOrder" method="post">
+                    <input type="submit" class="btn btn-default" value="Betaal Tickets" name="Submit"> 
+            </form>
+         </div>
+        </div>
+     </div>
+    </div>
+</body>
+{% endblock %}
