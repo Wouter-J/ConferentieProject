@@ -9,6 +9,10 @@ var session = require('express-session');
 var memcached = require('connect-memcached')(session);
 var cookieStore = new memcached({host: "localhost:8000"});
 var flash = require('connect-flash');
+var nodemailer = require('nodemailer');
+var passwordHash = require('password-hash');
+var qr = require('qr-image');
+var fs = require('fs');
 
 var app = express();
 

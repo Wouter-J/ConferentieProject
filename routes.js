@@ -90,8 +90,10 @@ router.post('/newReservering', function (req, res){
        hashCode: passwordHash.generate(req.body.email + req.body.ticketType),
        QRCode: 'QR'
     }; 
-    //var code = qr.image(passwordHash.generate(req.body.email + req.body.ticketType), { type: 'svg' });
-   // res.type('svg');
+    var code = qr.image(passwordHash.generate(req.body.email + req.body.ticketType), { type: 'png' });
+  // res.type('svg');
+        var output = fs.createWriteStream('memes.png');
+       code.pipe(output);  
     //code.pipe(res);
     
     console.log(post);
@@ -136,12 +138,48 @@ router.post('/newReservering', function (req, res){
  //Betaling bevestigen
 router.get('/betalen', function(req, res){
     console.log("Prijs Berekening");
+        doc = new PDFDocument;
+    doc.pipe( fs.createWriteStream('out.pdf') );
+    //maaltijdQR toevoegen
+    doc.text('Uw geweldige ticket!', 210, 0)
+    doc.image('memes.png', 0, 0, { fit: [205, 205] })
+    
+    doc.end();
+    console.log("PDF Klaar")
     res.render('partials/betalen.html.twig');
     //var post = { ticketType: sess.ticketType }
 })
 router.post('/confirmOrder', function(req,res){
+//Mailing-shizzay
+    
+    console.log("Order bevestigd");
+
+    //var post = {doc: doc }
+    fs.readFile('out.pdf', function(err, data) {
+        sendgrid.send({
+                to:       'wouter97@planet.nl',
+                cc:       'wouterjansen97@gmail.com',
+                from:     'info@conferentieStorm.nl',
+                subject:  'Uw conferentie tickets',
+                text:     'Koop mn shit',
+                files     : [{filename: 'out.pdf', path: 'out.pdf', content: data, contentType:'application/pdf'}],
+                }, function(err, json) {
+                if (err) { return console.error(err); }
+                console.log(json);
+        });
+    }); /* Old
+    sendgrid.send({
+        to:       'jan@mail.nl',
+        from:     'info@conferentieStorm.nl',
+        cc:       'wouter97@planet.nl',
+        subject:  'Uw tickets',
+        text:     'Koop mn shit'
+        }, function(err, json) {
+        if (err) { return console.error(err); }
+        console.log(json);
+        }); */
     res.render('partials/sucess/betalingGelukt.html.twig');
-})
+});
 
  //Reservering annuleren
 router.post('/cancelReservering', function(req, res){
@@ -180,8 +218,8 @@ router.post('/newSpreker', function (req, res){
        //idSpreker: null,
        onderwerp: req.body.onderwerp,
        wensen: req.body.wensen,
-       //voorkeurSloten: req.body.voorkeurSloten,
-       //toegewezenSloten: req.body.toegewezenSloten,
+       voorkeurSloten: 'meme',
+       toegewezenSloten: 'meme',
        rol: 'Spreker',
        maaltijdType: req.body.maaltijdType,
        naam: req.body.naam,

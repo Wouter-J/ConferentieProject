@@ -20,8 +20,11 @@
     "jasmine": "^2.5.1",
     "morgan": "~1.6.1",
     "mysql": "^2.10.2",
+    "nodemailer": "^2.6.4",
     "password-hash": "^1.2.2",
+    "pdfkit": "^0.8.0",
     "qr-image": "^3.1.0",
+    "sendgrid": "^2.0.0",
     "serve-favicon": "~2.3.0",
     "session": "^0.1.0",
     "twig": "^0.9.5"
