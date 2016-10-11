@@ -5,11 +5,17 @@ var Tijdslot = function (){
     idSpreker = '';
     onderwerpSlot = '';
     zaalNummer = '';
-    tijd = '';
+    beginTijd = '';
+    eindTijd = '';
+    idSlot = '';
+    beginTijd = '';
+    eindTijd = '';
+    Zaal = '';
+    statusID = '';
 };
 
 Tijdslot.getSloten = function(callback){
-    var query = "SELECT * FROM `tijdsloten` ORDER BY `idTijdsloten`";
+    var query = "SELECT * FROM `tijdsloten` ORDER BY `idTijdslot`";
     mysql.connection(function (err,conn){
         if(err){
             return callback(err);
@@ -26,9 +32,35 @@ Tijdslot.getSloten = function(callback){
                     "idSpreker": rows[i].idSpreker,
                     "onderwerpSlot": rows[i].onderwerpSlot,
                     "zaalNummer" : rows[i].zaalNummer,
-                    "tijd": rows[i].tijd,
+                    "beginTijd": rows[i].beginTijd,
+                    "eindTijd": rows[i].eindTijd,
                 });
             } return callback(null, tijdslot);
+        })
+    })
+}
+
+Tijdslot.getSlots = function(callback){
+    var query = "SELECT * FROM `Slot` ORDER BY `idSlot`";
+    mysql.connection(function (err,conn){
+        if(err){
+            return callback(err);
+
+        }
+        conn.query(query, function (err, rows){
+            if(err){
+                return callback(err);
+            } var slot = [];
+            
+           for (var i = 0; i < rows.length; i++) {
+                slot.push({
+                    "idSlot": rows[i].idSlot,
+                    "beginTijd": rows[i].beginTijd,
+                    "eindTijd": rows[i].eindTijd,
+                    "Zaal" : rows[i].Zaal,
+                    "statusID": rows[i].statusID,
+                });
+            } return callback(null, slot);
         })
     })
 }

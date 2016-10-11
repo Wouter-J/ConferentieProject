@@ -53,9 +53,6 @@ router.get('/inschrijvenSpreker', function(req,res){
 router.get('/tijdslot', function(req,res){
    res.render('partials/tijdslot.html.twig'); 
 });
-router.get('/tijdslot2', function(req,res){
-   res.render('partials/tijdslot2.html.twig'); 
-});
 router.get('/annuleerReservering', function(req,res){
    res.render('partials/ticketAnnuleren.html.twig'); 
 });
@@ -74,16 +71,7 @@ router.get('/agenda', function (req, res) { //geen klant
             if(err){
                 console.log(err);
             } else {
-                Agenda.getOptredens(function(err, items){
-                    if(err) {
-                         console.log(err);
-                    } else {
-                        res.render('partials/agenda.html.twig', {
-                            agenda_items: items,
-                            tijdslot_items: items2
-                        });
-                    }
-                })
+                res.render('partials/agenda.html.twig', {tijdslot_items: items2});
             }
         })
 });
@@ -241,6 +229,7 @@ router.post('/newSpreker', function (req, res){
        tussenvoegsel: req.body.tussenvoegsel,
        achternaam: req.body.achternaam,
        email: req.body.email,
+       dag: req.body.dag
    }; 
     console.log(post);
     Spreker.newSpreker(post, function(err, callback){
@@ -249,10 +238,28 @@ router.post('/newSpreker', function (req, res){
             //redirect toevoegen naar error
         } else {
             console.log("Spreker toegevoegd");
-            res.render('partials/tijdslot2.html.twig');
+            if(post.dag == 'Vrijdag'){
+                res.redirect('/tijdslot2');
+            }
+            if(post.dag == 'Zaterdag'){
+                console.log("Zaterdag");
+            }
+            
         }
     })
 });
+
+router.get('/tijdslot2', function(req, res){
+    console.log("gotcha");
+    Tijdslot.getSlots(function(err, items2){
+            if(err){
+                console.log(err);
+            } else {
+                res.render('partials/tijdslot2.html.twig', {slot_items: items2});
+            }
+        })
+    //res.render('partials/tijdslot2.html.twig');
+})
 
 //Organisator
 //Login
@@ -286,6 +293,20 @@ router.post('/loginUser', function (req, res){
             //ERROR MELDING INBOUWEN
         }
     })
+});
+
+//Actieve gebruikers
+router.get('/bezoekerOverzicht', function(req, res){
+    console.log("Ophalen bezoekers");
+    Organisator.getGebruikers(function(err, items){
+                if(err) {
+                     console.log(err);
+                } else {
+                    res.render('partials/bezoekerOverzicht.html.twig', {
+                        agenda_items: items,
+                    });
+                }
+    });
 });
 
 

@@ -11,7 +11,7 @@
     <script src="/jquery/dist/jquery.min.js"></script>
 </head>
 <body>
-        <div class="container">
+       <!-- <div class="container">
             <h3>Dag - Vrijdag</h3>
             <table class="table table-bordered">
               <tr>
@@ -124,16 +124,28 @@
                 <td class="danger">Spreker: Jochem, Onderwerp: Vliegtuigen</td>
                 <td class="success">Open</td>
               </tr>
-              Deze data wordt opgehaald uit de database: 
-                {% for tijdslot in tijdslot_items %}
-                    {% for agenda in agenda_items %}  
-                    <tr>
-                        <td>{{tijdslot.tijd}}</td>
-                        <td>Onderwerp: {{agenda.onderwerp}}</td>
-                    </tr>
-                    {% endfor %}
-                {% endfor %}       
             </table>
-        </div> 
+            </div> -->
+        <div class="container">
+            <table class="table table-bordered">
+                <tr>
+                <th>Tijd</th>
+                <th>Spreker & Onderwerp</th>
+                <th>Zaal</th>
+                </tr>
+                <tr>
+                    {% for tijdslot in tijdslot_items %}
+                      <tr>
+                         <td>{{tijdslot.beginTijd}} - {{tijdslot.eindTijd}}</td> 
+                        <td>Spreker: {{tijdslot.idSpreker}}, Onderwerp: {{tijdslot.onderwerpSlot}}</td>  
+                        <td>Zaal: {{tijdslot.zaalNummer}}</td>
+                     </tr>
+                    {% endfor %}
+                </tr>
+            </table>
+        </div>
+   
+                
+        
 </body>
     {% endblock %}

@@ -3,6 +3,10 @@ var mysql = require('../db.js');
 var Organisator = function () {
     email = '';
     wachtwoord = '';
+    ticketID = '';
+    incheckTijd = '';
+    aantalGebruikersBinnen = '';
+    email = '';
 };
 
 Organisator.loginUser = function (obj, callback){
@@ -29,6 +33,31 @@ Organisator.loginUser = function (obj, callback){
         })
     });
     
+};
+
+Organisator.getGebruikers = function(callback){
+    var query = "SELECT * FROM `Activegebruikers` ORDER BY `incheckTijd` ASC;";
+    mysql.connection(function (err, conn) {
+        if (err) {
+            return callback(err);
+        }
+        conn.query(query, function (err, rows) {
+            if (err) {
+                return callback(err);
+            }
+            var agenda = [];
+
+            for (var i = 0; i < rows.length; i++) {
+                agenda.push({
+                    "ticketID": rows[i].ticketID,
+                    "incheckTijd": rows[i].incheckTijd,
+                    "aantalGebruikersBinnen": rows[i].aantalGebruikersBinnen,
+                    "email": rows[i].email,
+                });
+            }
+            return callback(null, agenda);
+        })
+    });
 };
 
 module.exports = Organisator;

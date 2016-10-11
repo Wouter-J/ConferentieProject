@@ -14,48 +14,24 @@
         <div class="container">
             <h3>Dag - Vrijdag</h3>
             <table class="table table-bordered">
-              <tr>
+                <tr>
                 <th>Tijd</th>
-                <th>Zaal 1</th>
-                <th>Zaal 2</th> 
-                <th>Zaal 3</th>
-                <th>Zaal 4</th>
-              </tr>
-              <tr>
-                <td>15:30 - 16:30</td>
-                <td class="danger">Spreker: Kevin, Onderwerp: Websites</td> 
-                <td class="danger">Spreker: Harry, Onderwerp: HTML</td> 
-                <td class="danger">Spreker: Odijk, Onderwerp: NodeJS</td> 
-                <td class="success">Open</td>
-              </tr>
-              <tr>
-                <td>16:45 - 17:45</td>
-                <td class="danger">Spreker: Ruben, Onderwerp: ICT</td> 
-                <td class="success">Open</td>
-                <td class="info">Onder voorbehoud</td>
-                <td class="danger">Spreker: Jan, Onderwerp: Websites</td> 
-              </tr>
-              <tr>
-                <td>18:45 - 19:45</td>
-                <td class="success">Open</td>
-                <td class="success">Open</td>
-                <td class="info">Onder voorbehoud</td>
-                <td class="success">Open</td>
-              </tr>
-              <tr>
-                <td>20:00 - 21:00</td>
-                <td class="success">Open</td>
-                <td class="success">Open</td>
-                <td class="danger">Spreker: Jochem, Onderwerp: Vliegtuigen</td>
-                <td class="success">Open</td>
-              </tr>
-              <tr>
-                <td>21:30 - 22:30</td>
-                <td class="info">Onder voorbehoud</td>
-                <td class="success">Open</td>
-                <td class="success">Open</td>
-                <td class="info">Onder voorbehoud</td>
-              </tr>
+                <th>Zaal</th>
+                <th>Status</th>
+                <th>Keuze</th>
+                </tr>
+                <tr>
+                    1 = beschikbaar, 2 = Onder voorbehoud 3 = bezet
+                    {% for slot in slot_items %}
+                     <tr>
+                        <td>{{slot.beginTijd}} - {{slot.eindTijd}}</td>   
+                        <td>Zaal: {{slot.Zaal}}</td>
+                        <td>{{slot.statusID}}</td>
+                     </tr>
+                    {% endfor %}
+                        
+                        <!-- input keuze veld maken -->
+                </tr>
             </table>
         </div>   
 </body>
