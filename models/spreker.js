@@ -1,3 +1,16 @@
+/* idSpreker
+onderwerp
+wensen
+voorkeurSloten
+toegewezenSloten
+naam
+tussenvoegsel
+achternaam
+email
+rol
+idMaaltijd
+
+*/
 var mysql = require('../db.js');
 
 var Spreker = function(){
@@ -19,7 +32,7 @@ Spreker.newSpreker = function(obj, callback) {
         if (err) {
             return callback(err);
         }
-        conn.query(query, [obj.onderwerp, obj.wensen, obj.rol, obj.maaltijdType, obj.naam, obj.tussenvoegsel, obj.achternaam, obj.email, obj.maaltijdType], function (err, rows) {
+        conn.query(query, [obj.onderwerp, obj.wensen, obj.voorkeurSloten, obj.toegewezenSloten, obj.naam, obj.tussenvoegsel, obj.achternaam, obj.email, obj.rol, obj.maaltijdType], function (err, rows) {
             if (err) {
                 return callback(err,null);
             } else{

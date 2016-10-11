@@ -13,6 +13,26 @@
  * }
 */
 /*! normalize.css v3.0.2 | MIT License | git.io/normalize */
+
+/* custom css */
+
+/* Tickets reservering */
+    select#Vrijdag { display: none; }
+    select#Zaterdag { display: none;}
+    select#Zondag { display: none; }
+    select#ZaterdagEnZondag {display: none;}
+    select#ParsePartout {  display: none;}
+    th.Vrijdag { display: none;}
+    th.Zaterdag { display: none;}
+    th.Zondag { display: none;}
+    th.ZaterdagEnZondag { display: none;}
+    th.ParsePartout { display: none;}
+    td.Vrijdag { display: none; }
+    td.Zaterdag {display: none;}
+    td.Zondag { display: none;}
+    td.ZaterdagEnZondag { display: none;}
+    td.ParsePartout { display: none; }
+
 html {
   font-family: sans-serif;
   -ms-text-size-adjust: 100%;

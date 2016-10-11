@@ -16,32 +16,114 @@
      <div class="container">
         <div class="row">
          <div class="col-md-12">
+            <h4>Tickets</h4>
+            <table class="table table-borderd">
+                 <tr>
+                         <th>Ticket</th>
+                         <th>Prijs in euro</th>
+                 </tr>
+                <tr><td>Vrijdag</td><td>€45</td></tr>
+                <tr><td>Zaterdag</td><td>€60</td></tr>
+                <tr><td>Zondag</td><td>€30</td></tr>
+                <tr><td>Parse-partout</td><td>€100</td></tr>
+                <tr><td>Zaterdag & Zondag</td><td>€80</td></tr>
+            </table>
+            <h4>Maaltijden</h4>
+            <table class="table table-borderd">
+                 <tr>
+                         <th>Dagdeel</th>
+                         <th>Prijs</th>
+                         <th>Dagen</th>
+                         <th>Tijdstip</th>
+                 </tr>
+                <tr><td>Lunch</td><td>€20</td><td>Alle drie de dagen</td><td>12:00 - 13:30</td></tr>
+                <tr><td>Diner</td><td>€30</td><td>Alleen Weekend</td><td>17:30 - 20:00</td></tr>
+            </table>
+            <!-- Maaltijd lijst -->
             <form action="/newReservering" method="post">
                     <div class="form-group"><label class="control-label" for="Email">Email</label><input class="form-control" name="email" placeholder="Enter email" type="email">
                     </div>
-                    <div class="form-group"><label class="control-label" for="ticketType">Ticket Type:</label>
+                    <div class="form-group"><label class="control-label" for="ticketType">Ticket Type:</label>      
                         <select id="ticketType" name="ticketType">
+                            <option value='null'>Geen tickets</option>
                             <option value="Vrijdag">Vrijdag</option>
                             <option value="Zaterdag">Zaterdag</option>
                             <option value="Zondag">Zondag</option>
                             <option value="ParsePartout">Parse-partout</option>
                             <option value="ZaterdagEnZondag">Zaterdag & Zondag</option>
                         </select>
-                    </div>
-                    <div class="form-group"><label class="control-label" for="exampleInputEmail1">Maaltijd Type</label>
-                        <select id="maaltijdType" name="maaltijdType">
-                            <option value="Geen">Geen Maaltijd</option>
-                            <option value="Lunch">Lunch - Alle Dagen</option>
-                            <option value="Diner">Diner - Alleen Weekend</option>   
-                        </select>
-                    </div>
-                    <div class="form-group"><label class="control-label" for="exampleInputEmail1">Aantal Kaarten</label>                
-                        <select id="aantalKaarten" name="aantalKaarten">
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                        </select>
+                     <div class="form-group"><label class="control-label" for="exampleInputEmail1">Maaltijd Type</label> 
+                             <!-- table -->
+                                     <table class="table table-bordered">
+                                      <tr>
+                                        <th>Type</th>
+                                        <th class="Vrijdag">Vrijdag</th>
+                                        <th class="Zaterdag">Zaterdag</th> 
+                                        <th class="Zondag">Zondag</th>
+                                        <th class="ZaterdagEnZondag">Zaterdag</th>
+                                        <th class="ZaterdagEnZondag">Zondag</th>
+                                        <th class="ParsePartout">Vrijdag</th>
+                                        <th class="ParsePartout">Zaterdag</th>
+                                        <th class="ParsePartout">Zondag</th>
+                                      </tr>
+                                      <tr>
+                                        <td>Lunch</td>
+                                        <td class="Vrijdag">
+                                                <input type="number" id="lunchVrijdag" name="lunchVrijdag"  class="Vrijdag">
+                                        </td>
+                                        <td class="Zaterdag">
+                                         <input type="number" id="lunchZaterdag" name="lunchZaterdag" class="Zaterdag">
+                                        </td>
+                                        <td class="Zondag">
+                                                <input type="number" id="lunchZondag" name="lunchZondag" class="Zondag">
+                                        </td>
+                                        <td class="ZaterdagEnZondag">
+                                                <input type="number" id="lunchZaterdag" name="lunchZaterdag" class="ZaterdagEnZondag">
+                                        </td>
+                                        <td class="ZaterdagEnZondag">
+                                                <input type="number" id="lunchZondag" name="lunchZondag" class="ZaterdagEnZondag">
+                                        </td>
+                                        <td class="ParsePartout">
+                                                <input type="number" id="lunchVrijdag" name="lunchVrijdag" class="ParsePartout">
+                                        </td>
+                                        <td class="ParsePartout">
+                                                <input type="number" id="lunchZaterdag" name="lunchZaterdag" class="ParsePartout">
+                                        </td>
+                                        <td class="ParsePartout">
+                                                <input type="number" id="lunchZondag" name="lunchZondag" class="ParsePartout">
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td>Diner</td>
+                                        <!--<td class="Vrijdag">
+                                                <input type="number" id="aantalMaaltijdenDiner" name="aantalMaaltijdenLunch"  class="Vrijdag">
+                                        </td> -->
+                                        <td class="Zaterdag">
+                                         <input type="number" id="dinerZaterdag" name="dinerZaterdag" class="Zaterdag">
+                                        </td>
+                                        <td  class="Zondag">
+                                                <input type="number" id="dinerZondag" name="dinerZondag" class="Zondag">
+                                        </td>
+                                        <td  class="ZaterdagEnZondag">
+                                                <input type="number" id="dinerZaterdag" name="dinerZaterdag" class="ZaterdagEnZondag">
+                                        </td>
+                                        <td  class="ZaterdagEnZondag">
+                                                <input type="number" id="dinerZondag" name="dinerZondag" class="ZaterdagEnZondag">
+                                        </td>
+                                       <!-- <td class="ParsePartout">
+                                                <input type="number" id="aantalMaaltijdenDiner" name="aantalMaaltijdenLunch" class="ParsePartout">
+                                        </td> --> <td class="ParsePartout"></td>
+                                        <td class="ParsePartout">
+                                                <input type="number" id="dinerZaterdag" name="dinerZaterdag" class="ParsePartout">
+                                        </td>
+                                        <td class="ParsePartout">
+                                                <input type="number" id="dinerZondag" name="dinerZondag" class="ParsePartout">
+                                        </td>
+                                      </tr>
+                                    </table>
+                             <h4>Wilt u geen diner, dan vult u op alle velden een 0 in</h4>
+                                
+                      </div>
                     </div>
                     <input type="submit" class="btn btn-default" value="Betaal Tickets" name="Submit"> 
             </form>
@@ -50,4 +132,25 @@
      </div>
     </div>
 </body>
+        <script>
+            $('#ticketType').on('change',function(){
+                $('.ParsePartout').hide()
+                $('.ParsePartout').prop('disabled', true);
+                $('.ZaterdagEnZondag').hide()
+                $('.ZaterdagEnZondag').prop('disabled', true);
+                $('.Vrijdag').hide()
+                $('.Vrijdag').prop('disabled', true);
+                $('.Zaterdag').hide()
+                $('.Zaterdag').prop('disabled', true);
+                $('.Zondag').hide()
+                $('.Zondag').prop('disabled', true);
+                $('.'+this.value).show();
+                $('.'+this.value).show();
+                $('.'+this.value).prop('disabled', false);
+                $('.aantal').hide()
+                $('#'+this.value).show();
+                $('#'+this.value).prop('disabled', false);
+                console.log(this.value);
+            });
+        </script>
 {% endblock %}

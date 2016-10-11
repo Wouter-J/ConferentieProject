@@ -14,18 +14,22 @@ var Reservering = function(){
     rol = '';
     dagDeel = '';
     prijs = '';
-    typeMaaltijd = '';
     tijdstip = '';
     aantalvrij = '';
+    lunchVrijdag = '';
+    lunchZaterdag = '';
+    lunchZondag = '';
+    dinerZaterdag = '';
+    dinerZondag = '';
 }
 
 Reservering.newMaaltijd = function(obj, callback){
-    var query = "INSERT INTO `maaltijd` VALUES(NULL,?,?)";
+    var query = "INSERT INTO `maaltijd` VALUES(NULL,?,?,?,?,?,?)";
     mysql.connection(function (err, conn){
         if(err) {
             return callback(err);
         }
-        conn.query(query, [obj.ticketID, obj.maaltijdType], function (err, rows){
+        conn.query(query, [obj.ticketID, obj.lunchVrijdag, obj.lunchZaterdag, obj.dinerZaterdag, obj.lunchZondag, obj.dinerZondag], function (err, rows){
             if(err){
                 return callback(err, null);
             } else {
@@ -41,13 +45,22 @@ Reservering.checkFreeTickets = function(obj, callback){
             return callback(err);
         }
         conn.query(query, [obj.ticketType, obj.aantalVrij], function (err, rows) {
+            if(obj.ticketType == undefined || obj.ticketType == '') {
+                console.log("Undefined, gimme dat errror. ERROR NOG OPLOSSEN");
+                var ticketError = 'leeg';
+                return callback(null, ticketError)
+            }
             console.log("ticketType: " + obj.ticketType);
             var aantalVrij = rows[0].aantalVrij;
             console.log(aantalVrij);
             if (err) {
                 console.log("err");
                 return callback(err,null);
-            } else{
+            }
+            if (aantalVrij <= 0 ) {
+                console.log("geen tickets meer");
+            }
+            else{
                 return callback(null, aantalVrij);
             }
         });
