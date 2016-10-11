@@ -1,13 +1,13 @@
 var mysql = require('../db.js');
 
 var Agenda = function () {
-    tijdslotID = '';
+    idTijdslot = '';
     zaalNummer = '';
     onderwerp = '';
 };
 
 Agenda.getOptredens = function(callback){
-    var query = "SELECT * FROM `agenda` ORDER BY `tijdslotID` ASC;";
+    var query = "SELECT * FROM `agenda` ORDER BY `idTijdslot` ASC;";
     mysql.connection(function (err, conn) {
         if (err) {
             return callback(err);

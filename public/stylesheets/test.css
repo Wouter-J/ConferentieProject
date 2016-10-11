@@ -33,6 +33,14 @@
     td.ZaterdagEnZondag { display: none;}
     td.ParsePartout { display: none; }
 
+/* Backend */
+#functions {
+    background-color: #EFEFEF;
+    float: left;
+    display: block;
+    padding: 2em;
+}
+
 html {
   font-family: sans-serif;
   -ms-text-size-adjust: 100%;

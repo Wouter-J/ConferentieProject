@@ -10,6 +10,7 @@ var Annuleren  =require('./models/annuleren.js');
 var Tijdslot = require('./models/tijdslot.js');
 var Spreker = require('./models/spreker.js');
 var Reservering = require('./models/reservering.js');
+var Organisator = require('./models/organisator.js');
 
 //QR-Stuff
 var qr = require('qr-image');
@@ -52,8 +53,14 @@ router.get('/inschrijvenSpreker', function(req,res){
 router.get('/tijdslot', function(req,res){
    res.render('partials/tijdslot.html.twig'); 
 });
+router.get('/tijdslot2', function(req,res){
+   res.render('partials/tijdslot2.html.twig'); 
+});
 router.get('/annuleerReservering', function(req,res){
    res.render('partials/ticketAnnuleren.html.twig'); 
+});
+router.get('/login', function(req,res){
+   res.render('partials/login.html.twig'); 
 });
 /*
 router.get('/betalen', function(req,res){
@@ -242,9 +249,44 @@ router.post('/newSpreker', function (req, res){
             //redirect toevoegen naar error
         } else {
             console.log("Spreker toegevoegd");
-            console.log('Doorsturen naar tijdslotKeuze');
+            res.render('partials/tijdslot2.html.twig');
         }
     })
 });
+
+//Organisator
+//Login
+router.post('/loginUser', function (req, res){ 
+    var post = {
+        email: req.body.email,
+        wachtwoord: req.body.wachtwoord
+    };
+    sess = req.session;
+    console.log('/login geactiveerd');
+    Organisator.loginUser(post, function (err, callback){
+        console.log("Callback: " +callback);
+        if (err){
+            console.log(err);
+        } 
+        if(callback == 0){
+            res.render('partials/errors/errorLogin.html.twig');
+        }
+        if(callback == 1){
+            console.log("Sessie aanmaken");
+            sess.email = req.body.email;
+            sess.pwd   = req.body.wachtwoord;
+            console.log("Gebruikt email " + sess.email + "Gebruikt pwd: " + sess.pwd);
+            sess.rol = 'Organisator';
+            console.log(sess.rol);
+            res.render('partials/backend.html.twig');
+            //Link check inbouwen op backend
+        }
+        if(callback == 0){
+            console.log("Error melding: w8woord of email niet correct");
+            //ERROR MELDING INBOUWEN
+        }
+    })
+});
+
 
 module.exports = router;
