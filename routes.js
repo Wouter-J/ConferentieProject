@@ -16,6 +16,8 @@ var Organisator = require('./models/organisator.js');
 var qr = require('qr-image');
 var fs = require('fs');
 var _ = require('underscore');
+var moment = require('moment');
+moment().format();
 
 router.get('/qr', function(req, res) {  
   var code = qr.image(new Date().toString(), { type: 'svg' });
@@ -59,12 +61,11 @@ router.get('/annuleerReservering', function(req,res){
 router.get('/login', function(req,res){
    res.render('partials/login.html.twig'); 
 });
-/*
-router.get('/betalen', function(req,res){
-   res.render('partials/betalen.html.twig'); 
+router.get('/inchecken', function(req,res){
+   res.render('partials/incheck.html.twig'); 
 });
-*/
 //Agenda
+
 router.get('/agenda', function (req, res) { //geen klant
     console.log("Agenda geactiveerd");
         Tijdslot.getSloten(function(err, items2){
@@ -75,6 +76,7 @@ router.get('/agenda', function (req, res) { //geen klant
             }
         })
 });
+
 //Tickets
  //Reservering plaatsen
 router.post('/newReservering', function (req, res){
@@ -138,10 +140,11 @@ router.post('/newReservering', function (req, res){
                                         console.log("Geen shit ingevuld yow")
                                     }
                                     else {
+                                        var session = {tickedID, ticketType}
                                         console.log("Tickets gechecked " + callback);
                                         res.redirect('/betalen');
                                     }
-                            })    
+                            })      
                         }
                     })
                 }
@@ -154,12 +157,13 @@ router.get('/betalen', function(req, res){
     console.log("Prijs Berekening");
     console.log("Remove tickets");
     
-        doc = new PDFDocument;
+    doc = new PDFDocument;
     doc.pipe( fs.createWriteStream('out.pdf') );
     //maaltijdQR toevoegen
     doc.text('Uw geweldige ticket!', 210, 0)
     doc.image('memes.png', 0, 0, { fit: [205, 205] })
-    
+    doc.newPage();
+    doc.text(session.ticketID); //verdere info toevoegen !!
     doc.end();
     console.log("PDF Klaar")
     res.render('partials/betalen.html.twig');
@@ -303,11 +307,44 @@ router.get('/bezoekerOverzicht', function(req, res){
                      console.log(err);
                 } else {
                     res.render('partials/bezoekerOverzicht.html.twig', {
-                        agenda_items: items,
+                        bezoekers: items,
                     });
                 }
     });
 });
 
-
+//Inchecken
+router.post('/checkinUser', function(req, res){
+    var post = {email: req.body.email,
+                incheckTijd: Date.now(),
+                //aantalGebruikers
+                //ticketID
+               }
+    Organisator.getUser(post, function(err, callback){
+        if(err) {
+            console.log(err);
+            //redirect toevoegen naar error
+        } else {
+            console.log("ticketID: " + callback);
+            sess = req.session;
+            sess.ticketID = callback;
+            console.log("Gebruiker opgehaald");
+            //var now = moment();
+            var post = {email: req.body.email,
+                        incheckTijd: 2016,
+                        aantalGebruikers: 3,
+                        ticketID: callback
+                       }
+            console.log(post);
+            Organisator.checkinUser(post, function(err, callback){
+                if(err) {
+                    console.log(err);
+                    //redirect toevoegen naar error
+                } else {
+                    console.log("User ingecheckt");
+                }
+            })
+        }
+    })
+})
 module.exports = router;

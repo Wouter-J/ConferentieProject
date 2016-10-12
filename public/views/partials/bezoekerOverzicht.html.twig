@@ -19,15 +19,11 @@
      </div>
 <div class ="container">
         <div class="agenda-item row-fluid">
-            {% for agenda in agenda_items %}
-                    <div CLASS="span4">{{agenda.naamOptreden}}</div>
-                    <div CLASS="span4"> Artiest: {{agenda.artiest}} </div> 
-                    <div class="span4">Datum:   {{agenda.optredenDatum}}</div>
-                    <div class="span4">Vanaf:   {{agenda.beginTijd}}<br>
-                                        Tot:    {{agenda.eindTijd}}
-                    </div>
-                    <div class="span4">Ticketprijs: {{agenda.ticketPrijs}}</div>
-                    <div class="span4">Aantal Beschikbare kaarten: {{agenda.beschikbareKaarten}}</div>
+            {% for bezoeker in bezoekers %}
+                    <div CLASS="span4"> ticketID: {{bezoeker.ticketID}} </div> 
+                    <div CLASS="span4"> incheckTijd: {{bezoeker.incheckTijd}} </div> 
+                    <div CLASS="span4"> aantalGebruikersBinnen: {{bezoeker.aantalGebruikersBinnen}} </div> 
+                    <div CLASS="span4"> email: {{bezoeker.email}} </div> 
                 <hr />
             {% endfor %}
         </div>

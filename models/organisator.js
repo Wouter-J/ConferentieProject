@@ -35,6 +35,44 @@ Organisator.loginUser = function (obj, callback){
     
 };
 
+Organisator.checkinUser = function(obj, callback){
+    var query = "INSERT INTO `Activegebruikers` VALUES (?,?,?,?)";
+    mysql.connection(function (err, conn){
+        if(err) {
+            return callback(err);
+        }
+        conn.query(query, [obj.email, obj.incheckTijd, obj.aantalGebruikers, obj.ticketID], function (err, rows){
+            if(err){
+                return callback(err, null);
+            } else {
+                return callback(null, rows);
+            }
+        })
+    });
+};
+
+Organisator.getUser = function(obj, callback){
+    var query = "SELECT ticketID FROM `Tickets` where email = ?"; 
+     mysql.connection(function (err, conn) {
+        if (err) {
+            return callback(err);
+        }
+        conn.query(query, [obj.email, obj.QRCode, obj.ticketID], function (err, rows) {
+            console.log("email: " + obj.email);
+            var ticketID = rows[0].ticketID;
+            var QRCode = rows[0].QRCode;
+            console.log(ticketID);
+            console.log(QRCode)
+            if (err) {
+                console.log("err");
+                return callback(err,null);
+            } else{
+                return callback(null, ticketID);
+            }
+        });
+  });
+};
+
 Organisator.getGebruikers = function(callback){
     var query = "SELECT * FROM `Activegebruikers` ORDER BY `incheckTijd` ASC;";
     mysql.connection(function (err, conn) {
@@ -45,17 +83,17 @@ Organisator.getGebruikers = function(callback){
             if (err) {
                 return callback(err);
             }
-            var agenda = [];
+            var gebruikers = [];
 
             for (var i = 0; i < rows.length; i++) {
-                agenda.push({
+                gebruikers.push({
                     "ticketID": rows[i].ticketID,
                     "incheckTijd": rows[i].incheckTijd,
                     "aantalGebruikersBinnen": rows[i].aantalGebruikersBinnen,
                     "email": rows[i].email,
                 });
             }
-            return callback(null, agenda);
+            return callback(null, gebruikers);
         })
     });
 };

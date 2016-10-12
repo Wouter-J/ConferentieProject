@@ -15,7 +15,7 @@ var Tijdslot = function (){
 };
 
 Tijdslot.getSloten = function(callback){
-    var query = "SELECT * FROM `tijdsloten` ORDER BY `idTijdslot`";
+    var query = "SELECT * FROM `tijdsloten` INNER JOIN `spreker` ON `tijdsloten`.`idSpreker` = `spreker`.`idSpreker` ORDER BY `idTijdslot`";
     mysql.connection(function (err,conn){
         if(err){
             return callback(err);
@@ -33,7 +33,16 @@ Tijdslot.getSloten = function(callback){
                     "onderwerpSlot": rows[i].onderwerpSlot,
                     "zaalNummer" : rows[i].zaalNummer,
                     "beginTijd": rows[i].beginTijd,
-                    "eindTijd": rows[i].eindTijd,
+                    "onderwerp": rows[i].onderwerp,
+                    "wensen": rows[i].wensen,
+                    "voorkeurSloten": rows[i].voorkeurSloten,
+                    "toegewezenSloten": rows[i].toegewezenSloten,
+                    "naam": rows[i].naam,
+                    "tussenvoegsel": rows[i].tussenvoegsel,
+                    "achternaam": rows[i].achternaam,
+                    "email": rows[i].email,
+                    "rol": rows[i].rol,
+                    "idMaaltijd": rows[i].idMaaltijd,
                 });
             } return callback(null, tijdslot);
         })
