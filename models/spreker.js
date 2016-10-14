@@ -42,4 +42,31 @@ Spreker.newSpreker = function(obj, callback) {
     })
 };
 
+Spreker.getAanvragen = function(callback){
+    var query = "SELECT * FROM `spreker` ORDER BY `idSpreker` ASC;";
+    mysql.connection(function (err, conn) {
+        if (err) {
+            return callback(err);
+        }
+        conn.query(query, function (err, rows) {
+            if (err) {
+                return callback(err);
+            }
+            var gebruikers = [];
+
+            for (var i = 0; i < rows.length; i++) {
+                gebruikers.push({
+                    "idSpreker": rows[i].idSpreker,
+                    "onderwerp": rows[i].onderwerp,
+                    "wensen": rows[i].wensen,
+                    "email": rows[i].email,
+                    "voorkeurSloten": rows[i].voorkeurSloten,
+                    "naam": rows[i].naam,
+                });
+            }
+            return callback(null, gebruikers);
+        })
+    });
+};
+
 module.exports = Spreker;

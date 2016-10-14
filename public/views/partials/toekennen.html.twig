@@ -1,0 +1,49 @@
+{% extends 'index.html.twig' %}
+
+{% block body %}
+    
+<head>
+ <!-- Stylesheets -->
+    <link href="/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/stylesheets/main.css" rel="stylesheet">
+    
+    <!-- Library Scripts -->
+    <script src="/jquery/dist/jquery.min.js"></script>
+</head>
+<h2>Backend!!</h2>
+    <div id="functions">
+                <h5>Functies Organisator</h5>
+                <a href="/toekennenSloten">Sloten toekennen</a><br>
+                <a href="">Ticket overzicht</a><br>
+                <a href="/bezoekerOverzicht">Bezoeker overzicht</a><br>
+     </div>
+<div class ="container">
+        <div class="agenda-item row-fluid">
+          <table class="table table-bordered">
+            {% for spreker in sprekers %}
+                    <tr>
+                        <td> idSpreker: {{spreker.idSpreker}} </td> 
+                        <td> onderwerp: {{spreker.onderwerp}}</td> 
+                        <td> wensen: {{spreker.wensen}} </td>  
+                        <td> email: {{spreker.email}} </td>  
+                        <td> voorkeurSloten: {{spreker.voorkeurSloten}} </td>  
+                        <td> naam: {{spreker.naam}} </td> 
+                        <td> Keuze: 
+                        <form action="/slotToekennen" method="post">
+                            <input value ={{spreker.idSpreker}}>
+                            <select id="toegekendSlot" name="ticketType">
+                                <option value='eersteKeuze'>Eerste keuze</option>
+                                <option value="tweedeKeuze">Tweede keuze</option>
+                                <option value="derdeKeuze">Derde keuze</option>
+                            </select>
+                        </td>
+                        <td>
+                           <input type="submit" class="btn btn-default" value="Toekennen" name="Submit">
+                        </form>
+                        </td>
+                    </tr>
+            {% endfor %}
+          </table>
+        </div>
+</div>
+{% endblock %}

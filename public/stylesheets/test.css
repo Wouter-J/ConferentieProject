@@ -17,21 +17,37 @@
 /* custom css */
 
 /* Tickets reservering */
-    select#Vrijdag { display: none; }
-    select#Zaterdag { display: none;}
-    select#Zondag { display: none; }
-    select#ZaterdagEnZondag {display: none;}
-    select#ParsePartout {  display: none;}
-    th.Vrijdag { display: none;}
-    th.Zaterdag { display: none;}
-    th.Zondag { display: none;}
-    th.ZaterdagEnZondag { display: none;}
-    th.ParsePartout { display: none;}
-    td.Vrijdag { display: none; }
-    td.Zaterdag {display: none;}
-    td.Zondag { display: none;}
-    td.ZaterdagEnZondag { display: none;}
-    td.ParsePartout { display: none; }
+    select#ticketVrijdag { display: none; }
+    select#ticketZaterdag { display: none;}
+    select#ticketZondag { display: none; }
+    select#ticketZaterdagEnZondag {display: none;}
+    select#ticketParsePartout {  display: none;}
+    th.ticketVrijdag { display: none;}
+    th.ticketZaterdag { display: none;}
+    th.ticketZondag { display: none;}
+    th.ticketZaterdagEnZondag { display: none;}
+    th.ticketParsePartout { display: none;}
+    td.ticketVrijdag { display: none; }
+    td.ticketZaterdag {display: none;}
+    td.ticketZondag { display: none;}
+    td.ticketZaterdagEnZondag { display: none;}
+    td.ticketParsePartout { display: none; }
+/* Maaltijd reservering */
+    select#maaltijdVrijdag { display: none; }
+    select#maaltijdZaterdag { display: none;}
+    select#maaltijdZondag { display: none; }
+    select#maaltijdZaterdagEnZondag {display: none;}
+    select#maaltijdParsePartout {  display: none;}
+    th.maaltijdVrijdag { display: none;}
+    th.maaltijdZaterdag { display: none;}
+    th.maaltijdZondag { display: none;}
+    th.maaltijdZaterdagEnZondag { display: none;}
+    th.maaltijdParsePartout { display: none;}
+    td.maaltijdVrijdag { display: none; }
+    td.maaltijdZaterdag {display: none;}
+    td.maaltijdZondag { display: none;}
+    td.maaltijdZaterdagEnZondag { display: none;}
+    td.maaltijdParsePartout { display: none; }
 
 /* Backend */
 #functions {

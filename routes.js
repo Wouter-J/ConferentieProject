@@ -65,7 +65,6 @@ router.get('/inchecken', function(req,res){
    res.render('partials/incheck.html.twig'); 
 });
 //Agenda
-
 router.get('/agenda', function (req, res) { //geen klant
     console.log("Agenda geactiveerd");
         Tijdslot.getSloten(function(err, items2){
@@ -137,16 +136,16 @@ router.post('/newReservering', function (req, res){
                                         //redirect toevoegen naar error
                                     } 
                                     if(callback == 'leeg'){
-                                        console.log("Geen shit ingevuld yow")
+                                        console.log("Niks ingevuld");
                                     }
                                     else {
-                                        var session = {tickedID, ticketType}
+                                        var session = post.ticketID
                                         console.log("Tickets gechecked " + callback);
                                         res.redirect('/betalen');
                                     }
                             })      
                         }
-                    })
+                    }) 
                 }
             });
         }
@@ -162,8 +161,8 @@ router.get('/betalen', function(req, res){
     //maaltijdQR toevoegen
     doc.text('Uw geweldige ticket!', 210, 0)
     doc.image('memes.png', 0, 0, { fit: [205, 205] })
-    doc.newPage();
-    doc.text(session.ticketID); //verdere info toevoegen !!
+    //doc.newPage();
+    //doc.text(session.ticketID); //verdere info toevoegen !!
     doc.end();
     console.log("PDF Klaar")
     res.render('partials/betalen.html.twig');
@@ -178,7 +177,7 @@ router.post('/confirmOrder', function(req,res){
                 cc:       'wouterjansen97@gmail.com',
                 from:     'info@conferentieStorm.nl',
                 subject:  'Uw conferentie tickets',
-                text:     'Koop mn shit',
+                text:     'Veel plezier!',
                 files     : [{filename: 'out.pdf', path: 'out.pdf', content: data, contentType:'application/pdf'}],
                 }, function(err, json) {
                 if (err) { return console.error(err); }
@@ -252,7 +251,7 @@ router.post('/newSpreker', function (req, res){
         }
     })
 });
-
+//Ophalen sloten
 router.get('/tijdslot2', function(req, res){
     console.log("gotcha");
     Tijdslot.getSlots(function(err, items2){
@@ -263,7 +262,8 @@ router.get('/tijdslot2', function(req, res){
             }
         })
     //res.render('partials/tijdslot2.html.twig');
-})
+});
+//
 
 //Organisator
 //Login
@@ -346,5 +346,35 @@ router.post('/checkinUser', function(req, res){
             })
         }
     })
-})
+});
+
+//Toekennen sloten
+router.get('/toekennenSloten', function(req,res){
+    console.log("Ophalen aanvragen");
+    Spreker.getAanvragen(function(err, items){
+                if(err) {
+                     console.log(err);
+                } else {
+                    res.render('partials/toekennen.html.twig', {
+                        sprekers: items,
+                    });
+                }
+    });
+});
+
+router.post('/slotToekennen', function(req, res){
+   console.log("Keuze doorgegeven");
+   var post = {
+       idSpreker: req.body.idSpreker,
+       toegekendSlot: req.body.toegekendSlot
+   }
+   Organisator.slotToekennen(post, function(err, callback){
+        if(err) {
+            console.log(err);
+            //redirect toevoegen naar error
+        } else {
+            console.log("slotToegekend");
+        }
+   })
+});
 module.exports = router;

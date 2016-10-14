@@ -27,6 +27,19 @@
                         <td>{{slot.beginTijd}} - {{slot.eindTijd}}</td>   
                         <td>Zaal: {{slot.Zaal}}</td>
                         <td>{{slot.statusID}}</td>
+                        <td>
+                          <form action="/slotToekennen" method="post">
+                             <!-- <input value ={{slot.slotID}}> -->
+                            <select id="toegekendSlot" name="ticketType">
+                                <option value='Geen'>Niet spreken</option>
+                                <option value='eersteKeuze'>Eerste keuze</option>
+                                <option value="tweedeKeuze">Tweede keuze</option>
+                            </select>
+                        </td>
+                        <td>
+                           <input type="submit" class="btn btn-default" value="Kiezen" name="Submit">
+                         </form>
+                        </td>
                      </tr>
                     {% endfor %}
                         
