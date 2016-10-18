@@ -24,11 +24,18 @@ var Reservering = function(){
 }
 
 Reservering.newMaaltijd = function(obj, callback){
-    var query = "INSERT INTO `maaltijd` VALUES(NULL,?,?,?,?,?,?)";
+    var query = "INSERT INTO `Maaltijd` VALUES (NULL, ?, ?, ?, ?, ?, ?)";
     mysql.connection(function (err, conn){
         if(err) {
             return callback(err);
         }
+        //Clean the array's of their pesky comma business.
+        obj.lunchVrijdag = obj.lunchVrijdag.join("");
+        obj.lunchZaterdag = obj.lunchZaterdag.join("");
+        obj.dinerZaterdag = obj.dinerZaterdag.join("");
+        obj.lunchZondag = obj.lunchZondag.join("");
+        obj.dinerZondag = obj.dinerZondag.join("");
+
         conn.query(query, [obj.ticketID, obj.lunchVrijdag, obj.lunchZaterdag, obj.dinerZaterdag, obj.lunchZondag, obj.dinerZondag], function (err, rows){
             if(err){
                 return callback(err, null);
@@ -38,6 +45,28 @@ Reservering.newMaaltijd = function(obj, callback){
         })
     })
 };
+
+Reservering.newTicket = function(obj, callback){
+    var query = "INSERT INTO `Tickets` VALUES (?, ?, ?, ?)";
+    mysql.connection(function (err, conn){
+        if(err) {
+            return callback(err);
+        }
+        //Clean the array's of their pesky comma business.
+        obj.ticketVrijdag = obj.ticketVrijdag.join("");
+        obj.ticketZaterdag = obj.ticketZaterdag.join("");
+        obj.ticketZondag = obj.ticketZondag.join("");
+
+        conn.query(query, [obj.ticketID, obj.ticketVrijdag, obj.ticketZaterdag, obj.ticketZondag], function (err, rows){
+            if(err){
+                return callback(err, null);
+            } else {
+                return callback(null, rows);
+            }
+        })
+    })
+};
+
 Reservering.checkFreeTickets = function(obj, callback){
     var query = "SELECT aantalVrij from `Bestellingen` where ticketType = ?";
     mysql.connection(function (err, conn) {
@@ -61,6 +90,7 @@ Reservering.checkFreeTickets = function(obj, callback){
                 console.log("geen tickets meer");
             }
             else{
+                //verlagen van tickets voor de callback
                 return callback(null, aantalVrij);
             }
         });
@@ -69,7 +99,7 @@ Reservering.checkFreeTickets = function(obj, callback){
 
 Reservering.getTicketID = function(obj, callback){
     //QUERY VERANDEREN, EMAIL ZAL MEERDERE SHIT TERUGSTUREN
-  var query = "SELECT ticketID from `tickets` where email = ?";
+  var query = "SELECT ticketID from `Bestelling` where email = ?";
     mysql.connection(function (err, conn) {
         if (err) {
             return callback(err);
@@ -89,7 +119,7 @@ Reservering.getTicketID = function(obj, callback){
 }; 
 
 Reservering.newOrder = function(obj, callback) {
-    var query = "INSERT INTO `Tickets` VALUES(NULL,?,?,?,?)";
+    var query = "INSERT INTO `Bestelling` VALUES(NULL,?,?,?,?)";
         mysql.connection(function (err, conn){
         if(err) {
             return callback(err);

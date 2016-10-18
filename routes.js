@@ -79,24 +79,28 @@ router.get('/agenda', function (req, res) { //geen klant
 //Tickets
  //Reservering plaatsen
 router.post('/newReservering', function (req, res){
+    var code = qr.image(passwordHash.generate(req.body.email + req.body.ticketType), { type: 'png' });
+    // res.type('svg');
+    var output = fs.createWriteStream('memes.png');
+    code.pipe(output);  
+    //code.pipe(res);
    var post = {
        email: req.body.email,
        ticketType: req.body.ticketType,
        //ticketID: req.body.ticketID,
        hashCode: passwordHash.generate(req.body.email + req.body.ticketType),
-       QRCode: 'QR',
+       QRCode: 'memes.png',
        lunchVrijdag: req.body.lunchVrijdag,
        lunchZaterdag: req.body.lunchZaterdag,
        lunchZondag: req.body.lunchZondag,
        dinerZaterdag:req.body.dinerZaterdag,
-       dinerZondag: req.body.dinerZondag
+       dinerZondag: req.body.dinerZondag,
+       //Ticket time
+       ticketVrijdag: req.body.ticketVrijdag,
+       ticketZaterdag: req.body.ticketZaterdag,
+       ticketZondag: req.body.ticketZondag,
+       //Deze oplossing kan, weekend & parse-partout zijn dan gewoon korting
     }; 
-    var code = qr.image(passwordHash.generate(req.body.email + req.body.ticketType), { type: 'png' });
-    
-  // res.type('svg');
-        var output = fs.createWriteStream('memes.png');
-       code.pipe(output);  
-    //code.pipe(res);
     console.log(post);
     Reservering.newOrder(post, function(err, callback){
         if(err) {
@@ -121,7 +125,11 @@ router.post('/newReservering', function (req, res){
                        lunchZaterdag: req.body.lunchZaterdag,
                        lunchZondag: req.body.lunchZondag,
                        dinerZaterdag:req.body.dinerZaterdag,
-                       dinerZondag: req.body.dinerZondag
+                       dinerZondag: req.body.dinerZondag,
+                        //Ticket time
+                       ticketVrijdag: req.body.ticketVrijdag,
+                       ticketZaterdag: req.body.ticketZaterdag,
+                       ticketZondag: req.body.ticketZondag,
                    };
                    console.log(sess.ticketID);
                         Reservering.newMaaltijd(post, function(err, callback){
@@ -130,20 +138,28 @@ router.post('/newReservering', function (req, res){
                             //redirect toevoegen naar error
                         } else {
                             console.log("Maaltijd order toegevoegd");
-                            Reservering.checkFreeTickets(post, function(err, callback){
-                                    if(err) {
-                                        console.log(err);
-                                        //redirect toevoegen naar error
-                                    } 
-                                    if(callback == 'leeg'){
-                                        console.log("Niks ingevuld");
-                                    }
-                                    else {
-                                        var session = post.ticketID
-                                        console.log("Tickets gechecked " + callback);
-                                        res.redirect('/betalen');
-                                    }
-                            })      
+                            Reservering.newTicket(post, function(err, callback){
+                            if(err) {
+                                console.log(err);
+                                //redirect toevoegen naar error
+                            } else {
+                                console.log("Ticket order toegevoegd");
+                                Reservering.checkFreeTickets(post, function(err, callback){
+                                        if(err) {
+                                            console.log(err);
+                                            //redirect toevoegen naar error
+                                        } 
+                                        if(callback == 'leeg'){
+                                            console.log("Niks ingevuld");
+                                        }
+                                        else {
+                                            var session = post.ticketID
+                                            console.log("Tickets gechecked " + callback);
+                                            //res.redirect('/betalen');
+                                        }
+                                    })      
+                                }
+                            })
                         }
                     }) 
                 }
