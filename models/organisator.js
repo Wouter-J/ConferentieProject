@@ -36,12 +36,12 @@ Organisator.loginUser = function (obj, callback){
 };
 
 Organisator.checkinUser = function(obj, callback){
-    var query = "INSERT INTO `Activegebruikers` VALUES (?,?,?,?)";
+    var query = "INSERT INTO `activegebruikers` VALUES (?,?,GETDATE(),?)";
     mysql.connection(function (err, conn){
         if(err) {
             return callback(err);
         }
-        conn.query(query, [obj.email, obj.incheckTijd, obj.aantalGebruikers, obj.ticketID], function (err, rows){
+        conn.query(query, [obj.ticketID, obj.incheckTijd, obj.aantalGebruikers, obj.email ], function (err, rows){
             if(err){
                 return callback(err, null);
             } else {
@@ -52,17 +52,14 @@ Organisator.checkinUser = function(obj, callback){
 };
 
 Organisator.getUser = function(obj, callback){
-    var query = "SELECT ticketID FROM `Tickets` where email = ?"; 
+    var query = "SELECT ticketID FROM `Bestelling` where email = ?"; 
      mysql.connection(function (err, conn) {
         if (err) {
             return callback(err);
         }
-        conn.query(query, [obj.email, obj.QRCode, obj.ticketID], function (err, rows) {
+        conn.query(query, [obj.email, obj.ticketID], function (err, rows) {
             console.log("email: " + obj.email);
             var ticketID = rows[0].ticketID;
-            var QRCode = rows[0].QRCode;
-            console.log(ticketID);
-            console.log(QRCode)
             if (err) {
                 console.log("err");
                 return callback(err,null);

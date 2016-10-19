@@ -80,10 +80,9 @@ router.get('/agenda', function (req, res) { //geen klant
  //Reservering plaatsen
 router.post('/newReservering', function (req, res){
     var code = qr.image(passwordHash.generate(req.body.email + req.body.ticketType), { type: 'png' });
-    // res.type('svg');
     var output = fs.createWriteStream('memes.png');
     code.pipe(output);  
-    //code.pipe(res);
+
    var post = {
        email: req.body.email,
        ticketType: req.body.ticketType,
@@ -95,7 +94,6 @@ router.post('/newReservering', function (req, res){
        lunchZondag: req.body.lunchZondag,
        dinerZaterdag:req.body.dinerZaterdag,
        dinerZondag: req.body.dinerZondag,
-       //Ticket time
        ticketVrijdag: req.body.ticketVrijdag,
        ticketZaterdag: req.body.ticketZaterdag,
        ticketZondag: req.body.ticketZondag,
@@ -105,13 +103,13 @@ router.post('/newReservering', function (req, res){
     Reservering.newOrder(post, function(err, callback){
         if(err) {
             console.log(err);
-            //redirect toevoegen naar error
+            res.render('partials/error/betalingError.html.twig');
         } else {
             console.log("Ticket toegevoegd");
                 Reservering.getTicketID(post, function(err, callback){
                 if(err) {
                     console.log(err);
-                    //redirect toevoegen naar error
+                    res.render('partials/error/betalingError.html.twig');
                 } else {
                    console.log("ticketID: " + callback);
                     //session list
@@ -147,18 +145,17 @@ router.post('/newReservering', function (req, res){
                         Reservering.newMaaltijd(post, function(err, callback){
                         if(err) {
                             console.log(err);
-                            //redirect toevoegen naar error
+                            res.render('partials/error/betalingError.html.twig');
                         } else {
                             console.log("Maaltijd order toegevoegd");
                             Reservering.newTicket(post, function(err, callback){
                             if(err) {
                                 console.log(err);
-                                //redirect toevoegen naar error
+                                res.render('partials/error/betalingError.html.twig');
                             } else {
                                 console.log("Ticket order toegevoegd");
                                 res.redirect('/betalen');
-                               /* Functie beter uitdenken
-                                Reservering.checkFreeTickets(post, function(err, callback){
+                               /* Reservering.checkFreeTickets(post, function(err, callback){
                                         if(err) {
                                             console.log(err);
                                             //redirect toevoegen naar error
@@ -209,6 +206,7 @@ router.get('/betalen', function(req, res){
     Reservering.getTicketPrice(post, function(err, callback){  
         if(err){
             console.log(err);
+            res.render('partials/error/betalingError.html.twig');
         } else {
             console.log("prijs opgehaald " + callback);
             var priceTicket = callback;
@@ -223,7 +221,6 @@ router.get('/betalen', function(req, res){
             } else {
                 var diner = 0
             }
-
             //Ticket
             var calculation = priceTicket * post.ticketVrijdag;
             var calculation2 = priceTicket * post.ticketZaterdag;
@@ -267,14 +264,9 @@ router.get('/betalen', function(req, res){
                 ticketZondag: post.ticketZondag,
                 foodSolution: foodSolution,
                 completePrice: completePrice,
-                
             });
         }
     })
-    
-
-    
-    //var post = { ticketType: sess.ticketType } 
 });
 
 router.post('/confirmOrder', function(req,res){
@@ -438,11 +430,11 @@ router.post('/checkinUser', function(req, res){
             sess = req.session;
             sess.ticketID = callback;
             console.log("Gebruiker opgehaald");
-            //var now = moment();
+            var nu = Date.now();
             var post = {email: req.body.email,
-                        incheckTijd: 2016,
+                        incheckTijd: nu,
                         aantalGebruikers: 3,
-                        ticketID: callback
+                        ticketID: sess.ticketID
                        }
             console.log(post);
             Organisator.checkinUser(post, function(err, callback){
