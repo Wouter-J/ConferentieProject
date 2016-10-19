@@ -114,12 +114,20 @@ router.post('/newReservering', function (req, res){
                     //redirect toevoegen naar error
                 } else {
                    console.log("ticketID: " + callback);
-                   sess = req.session;
-                   sess.ticketID = callback;
-                   sess.ticketType = req.body.ticketType;
-                   sess.ticketVrijdag = req.body.ticketVrijdag;
+                    //session list
+                    sess = req.session;
+                    sess.ticketID = callback;
+                    sess.ticketType = req.body.ticketType;
+                    sess.ticketVrijdag = req.body.ticketVrijdag;
                     sess.ticketZaterdag = req.body.ticketZaterdag;
                     sess.ticketZondag = req.body.ticketZondag;
+                    sess.maaltijdType = req.body.maaltijdType;
+                    sess.lunchVrijdag=  req.body.lunchVrijdag;
+                    sess.lunchZaterdag= req.body.lunchZaterdag;
+                    sess.lunchZondag= req.body.lunchZondag;
+                    sess.dinerZaterdag =req.body.dinerZaterdag;
+                    sess.dinerZondag = req.body.dinerZondag;
+                    
                    var post = {
                        ticketID: sess.ticketID,
                        maaltijdType: req.body.maaltijdType,
@@ -175,43 +183,96 @@ router.post('/newReservering', function (req, res){
 });
  //Betaling bevestigen
 router.get('/betalen', function(req, res){
-    console.log("Prijs Berekening"); //hier gebleven
-    var post = {ticketType: sess.ticketType, ticketVrijdag: sess.ticketVrijdag, ticketZaterdag: sess.ticketZaterdag, ticketZondag: sess.ticketZondag}
-    Reservering.calculatePrice(post, function(err, callback){
+    console.log("Prijs Berekening"); 
+    var post = {
+        ticketType: sess.ticketType, 
+        maaltijdType: sess.maaltijdType, 
+        ticketVrijdag: sess.ticketVrijdag, 
+        ticketZaterdag: sess.ticketZaterdag, 
+        ticketZondag: sess.ticketZondag, 
+        lunchVrijdag: sess.lunchVrijdag, 
+        lunchZaterdag: sess.lunchZaterdag, 
+        dinerZaterdag: sess.dinerZaterdag, 
+        lunchZondag: sess.lunchZondag, 
+        dinerZondag: sess.dinerZondag
+    }
+    //Clean the array's of their pesky comma business.
+    post.ticketVrijdag = post.ticketVrijdag.join("");
+    post.ticketZaterdag = post.ticketZaterdag.join("");
+    post.ticketZondag = post.ticketZondag.join("");
+    post.lunchVrijdag = post.lunchVrijdag.join("");
+    post.lunchZaterdag = post.lunchZaterdag.join("");
+    post.dinerZaterdag = post.dinerZaterdag.join("");
+    post.lunchZondag = post.lunchZondag.join("");
+    post.dinerZondag = post.dinerZondag.join("");
+    
+    Reservering.getTicketPrice(post, function(err, callback){  
         if(err){
             console.log(err);
         } else {
             console.log("prijs opgehaald " + callback);
-            var price = callback;
-            //Clean the array's of their pesky comma business.
-            post.ticketVrijdag = post.ticketVrijdag.join("");
-            post.ticketZaterdag = post.ticketZaterdag.join("");
-            post.ticketZondag = post.ticketZondag.join("");
-            
-            var calculation = price * post.ticketVrijdag;
-            var calculation2 = price * post.ticketZaterdag;
-            var calculation3 = price * post.ticketZondag;
-            
+            var priceTicket = callback;
+            console.log(post.lunchZaterdag);
+            if (post.lunchVrijdag != 0 || post.lunchZaterdag != 0 || post.lunchZondag != 0){
+                    var lunch = 1;
+            } else {
+                   var lunch = 0;
+               }
+            if(post.dinerZaterdag != 0 || post.dinerZondag != 0){ 
+                var diner = 1;
+            } else {
+                var diner = 0
+            }
+
+            //Ticket
+            var calculation = priceTicket * post.ticketVrijdag;
+            var calculation2 = priceTicket * post.ticketZaterdag;
+            var calculation3 = priceTicket * post.ticketZondag;
             var solution = calculation + calculation2 + calculation3;
-            
             console.log(calculation);
             console.log(calculation2);
             console.log(calculation3);
             console.log(solution);
             
-            res.render('partials/betalen.html.twig', {solution: solution, price: price, ticketVrijdag: post.ticketVrijdag,ticketZaterdag: post.ticketZaterdag,ticketZondag: post.ticketZondag});
+            //verdere calculaties en solution toevoegen
+            if(lunch = 1){
+                var lunchCalculation = 20 * post.lunchVrijdag;
+                var lunchCalculation2 = 20 * post.lunchZaterdag;
+                var lunchCalculation3 = 20 * post.lunchZondag;
+                var lunchSolution = lunchCalculation + lunchCalculation2 + lunchCalculation3;
+            }
+            if(diner = 1){
+                var dinerCalculation = 30 * post.dinerZaterdag;
+                var dinerCalculation2 = 30 * post.dinerZondag;
+                var dinerSolution = dinerCalculation + dinerCalculation2;
+            }
+            var foodSolution = dinerSolution + lunchSolution;
+            var completePrice = foodSolution + solution;
+            
+                doc = new PDFDocument;
+                doc.pipe( fs.createWriteStream('out.pdf') );
+                //maaltijdQR toevoegen
+                doc.text('Uw geweldige ticket!', 210, 0)
+                doc.image('memes.png', 0, 0, { fit: [205, 205] })
+                //doc.newPage();
+                //doc.text(session.ticketID); //verdere info toevoegen !!
+                doc.end();
+                console.log("PDF Klaar");
+                
+            res.render('partials/betalen.html.twig', {
+                solution: solution, 
+                priceTicket: priceTicket, 
+                ticketVrijdag: post.ticketVrijdag,
+                ticketZaterdag: post.ticketZaterdag,
+                ticketZondag: post.ticketZondag,
+                foodSolution: foodSolution,
+                completePrice: completePrice,
+                
+            });
         }
     })
-    /*
-    doc = new PDFDocument;
-    doc.pipe( fs.createWriteStream('out.pdf') );
-    //maaltijdQR toevoegen
-    doc.text('Uw geweldige ticket!', 210, 0)
-    doc.image('memes.png', 0, 0, { fit: [205, 205] })
-    //doc.newPage();
-    //doc.text(session.ticketID); //verdere info toevoegen !!
-    doc.end();
-    console.log("PDF Klaar")*/
+    
+
     
     //var post = { ticketType: sess.ticketType } 
 });

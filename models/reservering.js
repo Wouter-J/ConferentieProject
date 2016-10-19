@@ -110,7 +110,7 @@ Reservering.checkFreeTickets = function(obj, callback){
         });
     })
 };
-Reservering.calculatePrice = function(obj, callback){
+Reservering.getTicketPrice = function(obj, callback){
     var query = "SELECT prijs from `Bestellingen` where ticketType = ?";
     mysql.connection(function (err, conn) {
         if (err) {
