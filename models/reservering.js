@@ -90,13 +90,52 @@ Reservering.checkFreeTickets = function(obj, callback){
                 console.log("geen tickets meer");
             }
             else{
-                //verlagen van tickets voor de callback
-                return callback(null, aantalVrij);
+            var query2 = "set SQL_SAFE_UPDATES = 0; UPDATE `Bestellingen` SET aantalVrij = aantalVrij - ? - ? - ? WHERE ticketType = ?;";
+                mysql.connection(function (err, conn) {
+                if (err) {
+                    return callback(err);
+                }
+                conn.query(query2, [obj.ticketVrijdag, obj.ticketZaterdag, obj.ticketZondag, obj.ticketType], function (err, rows) {
+                                if (err) {
+                console.log("err");
+                return callback(err,null);
+            }
+                    else {
+                        console.log("Verlaging gelukt");
+                        //return callback(null, aantalVrij);
+                    }
+                    });
+                }) 
             }
         });
     })
 };
-
+Reservering.calculatePrice = function(obj, callback){
+    var query = "SELECT prijs from `Bestellingen` where ticketType = ?";
+    mysql.connection(function (err, conn) {
+        if (err) {
+            return callback(err);
+        }
+        conn.query(query, [obj.ticketType, obj.prijs], function (err, rows) {
+            if(obj.ticketType == undefined || obj.ticketType == '') {
+                console.log("Undefined, gimme dat errror. ERROR NOG OPLOSSEN");
+                var ticketError = 'leeg';
+                return callback(null, ticketError)
+            }
+            console.log("ticketType: " + obj.ticketType);
+            var prijs = rows[0].prijs;
+            console.log(prijs);
+            if (err) {
+                console.log("err");
+                return callback(err,null);
+            }
+            else{
+                return callback(null, prijs);
+            }
+        })
+    })
+};
+                   
 Reservering.getTicketID = function(obj, callback){
     //QUERY VERANDEREN, EMAIL ZAL MEERDERE SHIT TERUGSTUREN
   var query = "SELECT ticketID from `Bestelling` where email = ?";

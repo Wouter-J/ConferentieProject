@@ -116,6 +116,10 @@ router.post('/newReservering', function (req, res){
                    console.log("ticketID: " + callback);
                    sess = req.session;
                    sess.ticketID = callback;
+                   sess.ticketType = req.body.ticketType;
+                   sess.ticketVrijdag = req.body.ticketVrijdag;
+                    sess.ticketZaterdag = req.body.ticketZaterdag;
+                    sess.ticketZondag = req.body.ticketZondag;
                    var post = {
                        ticketID: sess.ticketID,
                        maaltijdType: req.body.maaltijdType,
@@ -144,6 +148,8 @@ router.post('/newReservering', function (req, res){
                                 //redirect toevoegen naar error
                             } else {
                                 console.log("Ticket order toegevoegd");
+                                res.redirect('/betalen');
+                               /* Functie beter uitdenken
                                 Reservering.checkFreeTickets(post, function(err, callback){
                                         if(err) {
                                             console.log(err);
@@ -155,9 +161,9 @@ router.post('/newReservering', function (req, res){
                                         else {
                                             var session = post.ticketID
                                             console.log("Tickets gechecked " + callback);
-                                            //res.redirect('/betalen');
+                                            res.redirect('/betalen');
                                         }
-                                    })      
+                                    }) */     
                                 }
                             })
                         }
@@ -169,9 +175,34 @@ router.post('/newReservering', function (req, res){
 });
  //Betaling bevestigen
 router.get('/betalen', function(req, res){
-    console.log("Prijs Berekening");
-    console.log("Remove tickets");
-    
+    console.log("Prijs Berekening"); //hier gebleven
+    var post = {ticketType: sess.ticketType, ticketVrijdag: sess.ticketVrijdag, ticketZaterdag: sess.ticketZaterdag, ticketZondag: sess.ticketZondag}
+    Reservering.calculatePrice(post, function(err, callback){
+        if(err){
+            console.log(err);
+        } else {
+            console.log("prijs opgehaald " + callback);
+            var price = callback;
+            //Clean the array's of their pesky comma business.
+            post.ticketVrijdag = post.ticketVrijdag.join("");
+            post.ticketZaterdag = post.ticketZaterdag.join("");
+            post.ticketZondag = post.ticketZondag.join("");
+            
+            var calculation = price * post.ticketVrijdag;
+            var calculation2 = price * post.ticketZaterdag;
+            var calculation3 = price * post.ticketZondag;
+            
+            var solution = calculation + calculation2 + calculation3;
+            
+            console.log(calculation);
+            console.log(calculation2);
+            console.log(calculation3);
+            console.log(solution);
+            
+            res.render('partials/betalen.html.twig', {solution: solution, price: price, ticketVrijdag: post.ticketVrijdag,ticketZaterdag: post.ticketZaterdag,ticketZondag: post.ticketZondag});
+        }
+    })
+    /*
     doc = new PDFDocument;
     doc.pipe( fs.createWriteStream('out.pdf') );
     //maaltijdQR toevoegen
@@ -180,10 +211,11 @@ router.get('/betalen', function(req, res){
     //doc.newPage();
     //doc.text(session.ticketID); //verdere info toevoegen !!
     doc.end();
-    console.log("PDF Klaar")
-    res.render('partials/betalen.html.twig');
-    //var post = { ticketType: sess.ticketType }
-})
+    console.log("PDF Klaar")*/
+    
+    //var post = { ticketType: sess.ticketType } 
+});
+
 router.post('/confirmOrder', function(req,res){
 //Mailing-shizzay    
     console.log("Order bevestigd");
