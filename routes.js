@@ -416,23 +416,25 @@ router.get('/bezoekerOverzicht', function(req, res){
 
 //Inchecken
 router.post('/checkinUser', function(req, res){
-    var post = {email: req.body.email,
+    var post = {
+                email: req.body.email,
                 incheckTijd: Date.now(),
-                //aantalGebruikers
-                //ticketID
                }
     Organisator.getUser(post, function(err, callback){
         if(err) {
             console.log(err);
-            //redirect toevoegen naar error
-        } else {
+            res.render('partials/error/checkinError.html.twig');
+        }
+        if(callback = 'leeg'){
+            res.render('partials/error/checkinError.html.twig');
+        }
+        else {
             console.log("ticketID: " + callback);
             sess = req.session;
             sess.ticketID = callback;
-            console.log("Gebruiker opgehaald");
-            var nu = Date.now();
-            var post = {email: req.body.email,
-                        incheckTijd: nu,
+            var post = {
+                        email: req.body.email,
+                        incheckTijd: new Date(),
                         aantalGebruikers: 3,
                         ticketID: sess.ticketID
                        }
@@ -440,9 +442,9 @@ router.post('/checkinUser', function(req, res){
             Organisator.checkinUser(post, function(err, callback){
                 if(err) {
                     console.log(err);
-                    //redirect toevoegen naar error
+                    res.render('partials/error/checkinError.html.twig');
                 } else {
-                    console.log("User ingecheckt");
+                    res.render('partials/sucess/checkinSucess.html.twig');
                 }
             })
         }

@@ -36,7 +36,7 @@ Organisator.loginUser = function (obj, callback){
 };
 
 Organisator.checkinUser = function(obj, callback){
-    var query = "INSERT INTO `activegebruikers` VALUES (?,?,GETDATE(),?)";
+    var query = "INSERT INTO `activegebruikers` VALUES (?,?,?,?)";
     mysql.connection(function (err, conn){
         if(err) {
             return callback(err);
@@ -58,6 +58,11 @@ Organisator.getUser = function(obj, callback){
             return callback(err);
         }
         conn.query(query, [obj.email, obj.ticketID], function (err, rows) {
+            if(obj.ticketID == undefined || obj.ticketID == '') {
+                console.log("Undefined");
+                var ticketError = 'leeg';
+                return callback(null, ticketError)
+            }
             console.log("email: " + obj.email);
             var ticketID = rows[0].ticketID;
             if (err) {
