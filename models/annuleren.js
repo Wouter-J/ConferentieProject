@@ -9,7 +9,7 @@ var Annuleren = function(){
 }
 
 Annuleren.zoekOrder = function(obj, callback){
-  var query = "SELECT ticketID from `tickets` where hashCode = ? AND email=?";
+  var query = "SELECT ticketID from `bestelling` where hashCode = ? AND email=?";
     mysql.connection(function (err, conn) {
         if (err) {
             return callback(err);
@@ -29,7 +29,7 @@ Annuleren.zoekOrder = function(obj, callback){
 }; 
 
 Annuleren.verwijderOrder = function(obj, callback){
-    var query = "DELETE FROM  `tickets` where ticketID = ?";
+    var query = "DELETE FROM  `bestelling` where ticketID = ?";
     mysql.connection(function (err, conn) {
         if (err) {
             return callback(err);
