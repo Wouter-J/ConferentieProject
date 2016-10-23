@@ -73,6 +73,35 @@ Spreker.getAanvragen = function(callback){
     });
 };
 
+Spreker.getAanvragen2 = function(callback){
+    var query = "SELECT * FROM `Aanvragen` ORDER BY `idSpreker` ASC;";
+    mysql.connection(function (err, conn) {
+        if (err) {
+            return callback(err);
+        }
+        conn.query(query, function (err, rows) {
+            if (err) {
+                return callback(err);
+            }
+            var gebruikers = [];
+
+            for (var i = 0; i < rows.length; i++) {
+                gebruikers.push({
+                    "idTijdslot": rows[i].idTijdslot,
+                    "idSpreker": rows[i].idSpreker,
+                    "onderwerpSlot": rows[i].onderwerpSlot,
+                    "zaalNummer": rows[i].zaalNummer,
+                    "beginTijd": rows[i].beginTijd,
+                    "eindTijd": rows[i].eindTijd,
+                    "keuzeType": rows[i].keuzeType,
+                    
+                });
+            }
+            return callback(null, gebruikers);
+        })
+    });
+};
+
 Spreker.aanvraagPlaatsen  = function(obj, callback) {
     var query = "INSERT INTO `Aanvragen` VALUES(?,?,?,?,?,?,?)";
     mysql.connection(function (err, conn) {
@@ -88,5 +117,7 @@ Spreker.aanvraagPlaatsen  = function(obj, callback) {
         });
     })
 };
+
+Spreker.updateSpreker
 
 module.exports = Spreker;

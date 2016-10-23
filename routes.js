@@ -491,7 +491,7 @@ router.post('/checkinUser', function(req, res){
 //Toekennen sloten
 router.get('/toekennenSloten', function(req,res){
     console.log("Ophalen aanvragen");
-    Spreker.getAanvragen(function(err, items){
+    Spreker.getAanvragen2(function(err, items){
             if(err) {
                 console.log(err);
             } else {
@@ -500,6 +500,29 @@ router.get('/toekennenSloten', function(req,res){
             });
         }
     });
+});
+
+router.post('/slotToekennen', function(req,res){
+    var post = {
+        idSpreker: req.body.idSpreker,
+        keuze: req.body.keuze
+    }
+    if(post.keuze == 'afkeuren'){
+        console.log("Aanvraag afgekeurd");
+        Organisator.denyRequest(post, function(err, callback){
+                if(err) {
+                    console.log(err);
+                    //Error scherm
+                } else {
+                    console.log("Aanvraag verwijderd");
+                    //deletescherm
+                }
+            })
+    }
+    if(post.keuze == 'goedkeuren'){
+        console.log("Aanvraag goedgekeurd");
+    }
+    console.log(post);
 });
 
 router.post('/slotKeuze', function(req, res){

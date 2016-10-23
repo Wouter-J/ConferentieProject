@@ -100,4 +100,24 @@ Organisator.getGebruikers = function(callback){
     });
 };
 
+//Organisator sloten
+Organisator.denyRequest = function(obj, callback){
+    var query = "DELETE FROM `Aanvragen` WHERE idSpreker = ?";
+    mysql.connection(function (err, conn){
+        if(err){
+            return callback(err);
+        }
+        conn.query(query, [obj.idSpreker], function (err, rows){
+            if(err) {
+                //return callback(null, err);
+                console.log(err);
+            }
+            else {
+                return callback(null, rows)
+            }
+        })
+    })
+}
+
+
 module.exports = Organisator;

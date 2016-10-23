@@ -22,19 +22,19 @@
           <table class="table table-bordered">
             {% for spreker in sprekers %}
                     <tr>
+                        <td> idTijdslot: {{spreker.idTijdslot}} </td> 
                         <td> idSpreker: {{spreker.idSpreker}} </td> 
-                        <td> onderwerp: {{spreker.onderwerp}}</td> 
-                        <td> wensen: {{spreker.wensen}} </td>  
-                        <td> email: {{spreker.email}} </td>  
-                        <td> voorkeurSloten: {{spreker.voorkeurSloten}} </td>  
-                        <td> naam: {{spreker.naam}} </td> 
+                        <td> onderwerpSlot: {{spreker.onderwerpSlot}} </td> 
+                        <td> zaalNummer: {{spreker.zaalNummer}} </td> 
+                        <td> beginTijd: {{spreker.beginTijd}} </td> 
+                        <td> eindTijd: {{spreker.eindTijd}} </td> 
+                        <td> keuzeType: {{spreker.keuzeType}} </td> 
                         <td> Keuze: 
                         <form action="/slotToekennen" method="post">
-                            <input value ={{spreker.idSpreker}}>
-                            <select id="toegekendSlot" name="ticketType">
-                                <option value='eersteKeuze'>Eerste keuze</option>
-                                <option value="tweedeKeuze">Tweede keuze</option>
-                                <option value="derdeKeuze">Derde keuze</option>
+                            <input type="hidden" value ={{spreker.idSpreker}} name="idSpreker" >
+                            <select id="keuze" name="keuze">
+                                <option value='goedkeuren'>goedkeuren</option>
+                                <option value="afkeuren">afkeuren</option>
                             </select>
                         </td>
                         <td>
