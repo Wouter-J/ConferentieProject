@@ -137,7 +137,6 @@ Reservering.getTicketPrice = function(obj, callback){
 };
                    
 Reservering.getTicketID = function(obj, callback){
-    //QUERY VERANDEREN, EMAIL ZAL MEERDERE SHIT TERUGSTUREN
   var query = "SELECT ticketID from `Bestelling` where email = ?";
     mysql.connection(function (err, conn) {
         if (err) {

@@ -1,16 +1,3 @@
-/* idSpreker
-onderwerp
-wensen
-voorkeurSloten
-toegewezenSloten
-naam
-tussenvoegsel
-achternaam
-email
-rol
-idMaaltijd
-
-*/
 var mysql = require('../db.js');
 
 var Spreker = function(){
@@ -32,13 +19,30 @@ Spreker.newSpreker = function(obj, callback) {
         if (err) {
             return callback(err);
         }
-        conn.query(query, [obj.onderwerp, obj.wensen, obj.voorkeurSloten, obj.toegewezenSloten, obj.naam, obj.tussenvoegsel, obj.achternaam, obj.email, obj.rol, obj.maaltijdType], function (err, rows) {
+        conn.query(query, [obj.onderwerp, obj.wensen, obj.voorkeurSloten, obj.toegewezenSloten, obj.naam, obj.tussenvoegsel, obj.achternaam, obj.email, obj.rol, obj.idMaaltijd], function (err, rows) {
             if (err) {
                 return callback(err,null);
             } else{
                 return callback(null, rows);
             }
         });
+    })
+};
+
+Spreker.getID = function(obj, callback){
+    var query = "SELECT idSpreker from `Spreker` WHERE email = ?";
+    mysql.connection(function (err, conn){
+        if(err) {
+            return callback(err);
+        } 
+        conn.query(query, [obj.email, obj.idSpreker], function (err, rows){
+            var idSpreker = rows[0].idSpreker;
+            if(err){ 
+                    return callback(err, null);
+            } else {
+                return callback(null, idSpreker)
+            }
+        })
     })
 };
 
@@ -67,6 +71,22 @@ Spreker.getAanvragen = function(callback){
             return callback(null, gebruikers);
         })
     });
+};
+
+Spreker.aanvraagPlaatsen  = function(obj, callback) {
+    var query = "INSERT INTO `Aanvragen` VALUES(?,?,?,?,?,?,?)";
+    mysql.connection(function (err, conn) {
+        if (err) {
+            return callback(err);
+        }
+        conn.query(query, [obj.idTijdslot, obj.idSpreker, obj.onderwerpSlot, obj.zaalNummer, obj.beginTijd, obj.eindTijd, obj.keuzeType ], function (err, rows) {
+            if (err) {
+                return callback(err,null);
+            } else{
+                return callback(null, rows);
+            }
+        });
+    })
 };
 
 module.exports = Spreker;

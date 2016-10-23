@@ -333,28 +333,67 @@ router.post('/newSpreker', function (req, res){
        tussenvoegsel: req.body.tussenvoegsel,
        achternaam: req.body.achternaam,
        email: req.body.email,
-       dag: req.body.dag
+       maaltijdType: req.body.maaltijdType,
+       lunchVrijdag: req.body.lunchVrijdag,
+       lunchZaterdag: req.body.lunchZaterdag,
+       lunchZondag: req.body.lunchZondag,
+       dinerZaterdag:req.body.dinerZaterdag,
+       dinerZondag: req.body.dinerZondag,
    }; 
     console.log(post);
-    Spreker.newSpreker(post, function(err, callback){
+    Reservering.newMaaltijd(post, function(err, callback){
         if(err) {
             console.log(err);
             //redirect toevoegen naar error
         } else {
-            console.log("Spreker toegevoegd");
-            if(post.dag == 'Vrijdag'){
-                res.redirect('/tijdslot2');
-            }
-            if(post.dag == 'Zaterdag'){
-                console.log("Zaterdag");
-            }
-            
+            Spreker.newSpreker(post, function(err, callback){
+                if(err) { console.log(err); }
+                else {
+                    Spreker.getID(post, function(err, callback){
+                        if(err) {
+                            console.log(err);
+                        } else {
+                            sess = req.session;
+                            sess.idSpreker = callback;
+                            sess.onderwerp = req.body.onderwerp;
+                            console.log("Maaltijd toegevoegd");
+                            var post = {       idSpreker: sess.idSpreker,
+                                               onderwerp: sess.onderwerp,
+                                               wensen: req.body.wensen,
+                                               voorkeurSloten: 'meme',
+                                               toegewezenSloten: 'meme',
+                                               rol: 'Spreker',
+                                               maaltijdType: req.body.maaltijdType,
+                                               naam: req.body.naam,
+                                               tussenvoegsel: req.body.tussenvoegsel,
+                                               achternaam: req.body.achternaam,
+                                               email: req.body.email,
+                                               maaltijdType: req.body.maaltijdType,
+                                               lunchVrijdag: req.body.lunchVrijdag,
+                                               lunchZaterdag: req.body.lunchZaterdag,
+                                               lunchZondag: req.body.lunchZondag,
+                                               dinerZaterdag:req.body.dinerZaterdag,
+                                               dinerZondag: req.body.dinerZondag,
+                                       }
+                            if(post.maaltijdType == 'maaltijdVrijdag'){
+                                res.redirect('/tijdslot2');
+                            }
+                            if(post.maaltijdType == 'maaltijdZaterdag'){
+                                console.log("Zaterdag");
+                            }
+                            if(post.maaltijdType == 'maaltijdZondag'){
+                                console.log("Zondag");
+                            }
+                        }
+                    })
+                    
+                }
+            }) 
         }
-    })
+    });
 });
 //Ophalen sloten
 router.get('/tijdslot2', function(req, res){
-    console.log("gotcha");
     Tijdslot.getSlots(function(err, items2){
             if(err){
                 console.log(err);
@@ -362,9 +401,7 @@ router.get('/tijdslot2', function(req, res){
                 res.render('partials/tijdslot2.html.twig', {slot_items: items2});
             }
         })
-    //res.render('partials/tijdslot2.html.twig');
 });
-//
 
 //Organisator
 //Login
@@ -455,23 +492,29 @@ router.post('/checkinUser', function(req, res){
 router.get('/toekennenSloten', function(req,res){
     console.log("Ophalen aanvragen");
     Spreker.getAanvragen(function(err, items){
-                if(err) {
-                     console.log(err);
-                } else {
-                    res.render('partials/toekennen.html.twig', {
-                        sprekers: items,
-                    });
-                }
+            if(err) {
+                console.log(err);
+            } else {
+                res.render('partials/toekennen.html.twig', {
+                sprekers: items,
+            });
+        }
     });
 });
 
-router.post('/slotToekennen', function(req, res){
+router.post('/slotKeuze', function(req, res){
    console.log("Keuze doorgegeven");
    var post = {
-       idSpreker: req.body.idSpreker,
-       toegekendSlot: req.body.toegekendSlot
+       idSpreker: sess.idSpreker,
+       idSlot: req.body.idSlot,
+       onderwerpSlot: sess.onderwerp,
+       zaalNummer: req.body.zaalnummer,
+       beginTijd: req.body.beginTijd,
+       eindTijd: req.body.eindTijd,
+       keuzeType: req.body.keuzeType,
    }
-   Organisator.slotToekennen(post, function(err, callback){
+   console.log(post);
+   Spreker.aanvraagPlaatsen(post, function(err, callback){
         if(err) {
             console.log(err);
             //redirect toevoegen naar error

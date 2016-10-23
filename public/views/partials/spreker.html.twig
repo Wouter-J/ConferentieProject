@@ -33,20 +33,82 @@
                     </div>
                     <div class="form-group"><label class="control-label" for="Wensen">Wensen (Beamer, borden etc.)</label><input class="form-control" name="wensen" placeholder="Wensen" type="text">
                     </div>
-                    <div class="form-group"><label class="control-label" for="exampleInputEmail1">Maaltijd Type</label>
-                        <select id="maaltijdType" name="maaltijdType">
-                            <option value="1">Lunch - Alle Dagen</option>
-                            <option value="2">Diner - Alleen Weekend</option>
-                            <option value="3">Geen Maaltijd</option>
-                        </select>
-                    </div>
                     <div class="form-group"><label class="control-label" for="exampleInputEmail1">Dag waarop u wilt spreken</label>
-                        <select id="dag" name="dag">
-                            <option value="Vrijdag">Vrijdag</option>
-                            <option value="Zaterdag">Zaterdag</option>
-                            <option value="Zondag">Zondag</option>
-                        </select>
-                    </div>
+                             <select id="maaltijdType" name="maaltijdType">
+                                <option value="null">Geen dag</option>
+                                <option value="maaltijdVrijdag">Vrijdag</option>
+                                <option value="maaltijdZaterdag">Zaterdag</option>
+                                <option value="maaltijdZondag">Zondag</option>
+                                <option value="maaltijdParsePartout">Parse-partout</option>
+                                <option value="maaltijdZaterdagEnZondag">Zaterdag & Zondag</option>
+                            </select>
+                             <div class="form-group"><label class="control-label" for="exampleInputEmail1">Maaltijd Type</label> 
+                                     <table class="table table-bordered">
+                                      <tr>
+                                        <th>Type</th>
+                                        <th class="maaltijdVrijdag">Vrijdag</th>
+                                        <th class="maaltijdZaterdag">Zaterdag</th> 
+                                        <th class="maaltijdZondag">Zondag</th>
+                                        <th class="maaltijdZaterdagEnZondag">Zaterdag</th>
+                                        <th class="maaltijdZaterdagEnZondag">Zondag</th>
+                                        <th class="maaltijdParsePartout">Vrijdag</th>
+                                        <th class="maaltijdParsePartout">Zaterdag</th>
+                                        <th class="maaltijdParsePartout">Zondag</th>
+                                      </tr>
+                                      <tr>
+                                        <td>Lunch</td>
+                                        <td class="maaltijdVrijdag">
+                                                <input type="number" id="lunchVrijdag" name="lunchVrijdag"  class="Vrijdag">
+                                        </td>
+                                        <td class="maaltijdZaterdag">
+                                         <input type="number" id="lunchZaterdag" name="lunchZaterdag" class="Zaterdag">
+                                        </td>
+                                        <td class="maaltijdZondag">
+                                                <input type="number" id="lunchZondag" name="lunchZondag" class="Zondag">
+                                        </td>
+                                        <td class="maaltijdZaterdagEnZondag">
+                                                <input type="number" id="lunchZaterdag" name="lunchZaterdag" class="ZaterdagEnZondag">
+                                        </td>
+                                        <td class="maaltijdZaterdagEnZondag">
+                                                <input type="number" id="lunchZondag" name="lunchZondag" class="ZaterdagEnZondag">
+                                        </td>
+                                        <td class="maaltijdParsePartout">
+                                                <input type="number" id="lunchVrijdag" name="lunchVrijdag" class="ParsePartout">
+                                        </td>
+                                        <td class="maaltijdParsePartout">
+                                                <input type="number" id="lunchZaterdag" name="lunchZaterdag" class="ParsePartout">
+                                        </td>
+                                        <td class="maaltijdParsePartout">
+                                                <input type="number" id="lunchZondag" name="lunchZondag" class="ParsePartout">
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td>Diner</td>
+                                        <td class="maaltijdZaterdag">
+                                         <input type="number" id="dinerZaterdag" name="dinerZaterdag" class="Zaterdag">
+                                        </td>
+                                        <td  class="maaltijdZondag">
+                                                <input type="number" id="dinerZondag" name="dinerZondag" class="Zondag">
+                                        </td>
+                                        <td  class="maaltijdZaterdagEnZondag">
+                                                <input type="number" id="dinerZaterdag" name="dinerZaterdag" class="ZaterdagEnZondag">
+                                        </td>
+                                        <td  class="maaltijdZaterdagEnZondag">
+                                                <input type="number" id="dinerZondag" name="dinerZondag" class="ZaterdagEnZondag">
+                                        </td>
+                                       <!-- <td class="ParsePartout">
+                                                <input type="number" id="aantalMaaltijdenDiner" name="aantalMaaltijdenLunch" class="ParsePartout">
+                                        </td> --> <td class="ParsePartout"></td>
+                                        <td class="maaltijdParsePartout">
+                                                <input type="number" id="dinerZaterdag" name="dinerZaterdag" class="ParsePartout">
+                                        </td>
+                                        <td class="maaltijdParsePartout">
+                                                <input type="number" id="dinerZondag" name="dinerZondag" class="ParsePartout">
+                                        </td>
+                                      </tr>
+                                    </table>
+                             <h4>Wilt u geen diner, dan vult u op alle velden een 0 in</h4>    
+                      </div>
                     <input type="submit" class="btn btn-default" value="Kies uw tijdsloten" name="Submit"> 
             </form>
          </div>
@@ -54,4 +116,24 @@
      </div>
     </div>
 </body>
+        <script>
+            $('#maaltijdType').on('change',function(){
+                $('.maaltijdParsePartout').hide()
+                $('.maaltijdParsePartout').prop('disabled', true);
+                $('.maaltijdZaterdagEnZondag').hide()
+                $('.maaltijdZaterdagEnZondag').prop('disabled', true);
+                $('.maaltijdVrijdag').hide()
+                $('.maaltijdVrijdag').prop('disabled', true);
+                $('.maaltijdZaterdag').hide()
+                $('.maaltijdZaterdag').prop('disabled', true);
+                $('.maaltijdZondag').hide()
+                $('.maaltijdZondag').prop('disabled', true);
+                $('.'+this.value).show();
+                $('.'+this.value).prop('disabled', false);
+                $('.aantal').hide()
+                $('#'+this.value).show();
+                $('#'+this.value).prop('disabled', false);
+                console.log(this.value);
+            });
+    </script>
 {% endblock %}
