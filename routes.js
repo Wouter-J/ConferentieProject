@@ -491,7 +491,7 @@ router.post('/checkinUser', function(req, res){
 //Toekennen sloten
 router.get('/toekennenSloten', function(req,res){
     console.log("Ophalen aanvragen");
-    Spreker.getAanvragen2(function(err, items){
+    Spreker.getAanvragen(function(err, items){
             if(err) {
                 console.log(err);
             } else {
@@ -517,12 +517,52 @@ router.post('/slotToekennen', function(req,res){
                     console.log("Aanvraag verwijderd");
                     //deletescherm
                 }
-            })
+        })
     }
     if(post.keuze == 'goedkeuren'){
         console.log("Aanvraag goedgekeurd");
+        Spreker.getAanvraag(post, function(err, callback){
+            if(err){
+                console.log(err);
+            } else {
+                //Variable time
+                var idSpreker = callback[0].idSpreker;
+                var idTijdslot = callback[0].idTijdslot;
+                var onderwerpSlot = callback[0].onderwerpSlot;
+                var zaalNummer = callback[0].zaalNummer;
+                var beginTijd = callback[0].beginTijd;
+                var eindTijd = callback[0].eindTijd;
+                
+                var post = {
+                    idSpreker: idSpreker,
+                    idTijdslot: idTijdslot,
+                    onderwerpSlot: onderwerpSlot,
+                    zaalNummer: zaalNummer,
+                    beginTijd: beginTijd,
+                    eindTijd: eindTijd,
+                }
+                console.log(post);
+                Organisator.allowRequest(post, function(err, callback){
+                        if(err) {
+                            console.log(err);
+                            //Error scherm
+                        } else {
+                            console.log("Aanvraag toegevoegd aan agenda");
+                            var post = { idSpreker: idSpreker}
+                            Organisator.denyRequest(post, function(err, callback){
+                                if(err) {
+                                    console.log(err);
+                                    //Error scherm
+                                } else {
+                                    console.log("Aanvraag verwijderd");
+                                    //deletescherm
+                                  }
+                            }) 
+                        }
+                }) 
+            }
+        }) 
     }
-    console.log(post);
 });
 
 router.post('/slotKeuze', function(req, res){

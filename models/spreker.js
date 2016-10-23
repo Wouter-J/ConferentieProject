@@ -46,7 +46,7 @@ Spreker.getID = function(obj, callback){
     })
 };
 
-Spreker.getAanvragen = function(callback){
+/* Spreker.getAanvragen = function(callback){
     var query = "SELECT * FROM `spreker` ORDER BY `idSpreker` ASC;";
     mysql.connection(function (err, conn) {
         if (err) {
@@ -71,9 +71,9 @@ Spreker.getAanvragen = function(callback){
             return callback(null, gebruikers);
         })
     });
-};
+}; */
 
-Spreker.getAanvragen2 = function(callback){
+Spreker.getAanvragen = function(callback){
     var query = "SELECT * FROM `Aanvragen` ORDER BY `idSpreker` ASC;";
     mysql.connection(function (err, conn) {
         if (err) {
@@ -101,7 +101,21 @@ Spreker.getAanvragen2 = function(callback){
         })
     });
 };
-
+Spreker.getAanvraag = function(obj, callback){
+    var query = "SELECT * FROM `Aanvragen` WHERE idSpreker = ?";
+    mysql.connection(function (err, conn) {
+        if (err) {
+            return callback(err);
+        }
+        conn.query(query, [obj.idSpreker], function (err, rows){
+            if(err){ 
+                    return callback(err, null);
+            } else {
+                return callback(null, rows)
+            }
+        })
+    });
+};
 Spreker.aanvraagPlaatsen  = function(obj, callback) {
     var query = "INSERT INTO `Aanvragen` VALUES(?,?,?,?,?,?,?)";
     mysql.connection(function (err, conn) {

@@ -119,5 +119,23 @@ Organisator.denyRequest = function(obj, callback){
     })
 }
 
+Organisator.allowRequest = function(obj, callback){
+    var query = "INSERT INTO `Agenda` VALUES(?,?,?,?,?,?)";
+    mysql.connection(function (err, conn){
+        if(err){
+            return callback(err);
+        }
+        conn.query(query, [obj.idTijdslot, obj.idSpreker, obj.onderwerpSlot, obj.zaalNummer,obj.beginTijd,obj.eindTijd ], function (err, rows){
+            if(err) {
+                //return callback(null, err);
+                console.log(err);
+            }
+            else {
+                return callback(null, rows)
+            }
+        })
+    })
+}
+
 
 module.exports = Organisator;

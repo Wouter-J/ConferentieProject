@@ -1,5 +1,6 @@
 {
     "jscodehints.detectedExclusions": [
-        "C:/Users/Wouter/workspace/VergaderingProjecten/angularEnNode/bower_components/jquery/src/event/support.js"
+        "C:/Users/Wouter/workspace/VergaderingProjecten/angularEnNode/bower_components/jquery/src/event/support.js",
+        "sizzle.js"
     ]
 }
