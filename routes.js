@@ -455,7 +455,7 @@ router.get('/bezoekerOverzicht', function(req, res){
 router.post('/checkinUser', function(req, res){
     var post = {
                 email: req.body.email,
-                incheckTijd: Date.now(),
+                incheckTijd: new Date(),
                }
     Organisator.getUser(post, function(err, callback){
         if(err) {
@@ -575,6 +575,7 @@ router.post('/slotKeuze', function(req, res){
        beginTijd: req.body.beginTijd,
        eindTijd: req.body.eindTijd,
        keuzeType: req.body.keuzeType,
+       datum: new Date()
    }
    console.log(post);
    Spreker.aanvraagPlaatsen(post, function(err, callback){
