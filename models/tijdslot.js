@@ -1,7 +1,7 @@
 var mysql = require('../db.js');
 
 var Tijdslot = function (){
-    idTijdsloten = '';
+    idSlot = '';
     idSpreker = '';
     onderwerpSlot = '';
     zaalNummer = '';
@@ -11,11 +11,11 @@ var Tijdslot = function (){
     beginTijd = '';
     eindTijd = '';
     Zaal = '';
-    statusID = '';
+    status = '';
 };
 
 Tijdslot.getSloten = function(callback){
-    var query = "SELECT * FROM `Agenda` INNER JOIN `spreker` ON `Agenda`.`idSpreker` = `spreker`.`idSpreker` ORDER BY `idTijdslot`";
+    var query = "SELECT * FROM `Agenda` INNER JOIN `spreker` ON `Agenda`.`idSpreker` = `spreker`.`idSpreker` ORDER BY `idSlot`";
     mysql.connection(function (err,conn){
         if(err){
             return callback(err);
@@ -28,7 +28,7 @@ Tijdslot.getSloten = function(callback){
             
            for (var i = 0; i < rows.length; i++) {
                 tijdslot.push({
-                    "idTijdsloten": rows[i].idTijdsloten,
+                    "idSlot": rows[i].idSlot,
                     "idSpreker": rows[i].idSpreker,
                     "onderwerpSlot": rows[i].onderwerpSlot,
                     "zaalNummer" : rows[i].zaalNummer,
@@ -68,7 +68,7 @@ Tijdslot.getSlots = function(callback){
                     "beginTijd": rows[i].beginTijd,
                     "eindTijd": rows[i].eindTijd,
                     "Zaal" : rows[i].Zaal,
-                    "statusID": rows[i].statusID,
+                    "status": rows[i].status,
                 });
             } return callback(null, slot);
         })

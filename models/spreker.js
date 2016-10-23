@@ -11,6 +11,7 @@ var Spreker = function(){
     email = '';
     rol = '';
     idMaaltijd = '';
+    status = '';
 }
 
 Spreker.newSpreker = function(obj, callback) {
@@ -46,33 +47,6 @@ Spreker.getID = function(obj, callback){
     })
 };
 
-/* Spreker.getAanvragen = function(callback){
-    var query = "SELECT * FROM `spreker` ORDER BY `idSpreker` ASC;";
-    mysql.connection(function (err, conn) {
-        if (err) {
-            return callback(err);
-        }
-        conn.query(query, function (err, rows) {
-            if (err) {
-                return callback(err);
-            }
-            var gebruikers = [];
-
-            for (var i = 0; i < rows.length; i++) {
-                gebruikers.push({
-                    "idSpreker": rows[i].idSpreker,
-                    "onderwerp": rows[i].onderwerp,
-                    "wensen": rows[i].wensen,
-                    "email": rows[i].email,
-                    "voorkeurSloten": rows[i].voorkeurSloten,
-                    "naam": rows[i].naam,
-                });
-            }
-            return callback(null, gebruikers);
-        })
-    });
-}; */
-
 Spreker.getAanvragen = function(callback){
     var query = "SELECT * FROM `Aanvragen` ORDER BY `datum` ASC;";
     mysql.connection(function (err, conn) {
@@ -87,7 +61,7 @@ Spreker.getAanvragen = function(callback){
 
             for (var i = 0; i < rows.length; i++) {
                 gebruikers.push({
-                    "idTijdslot": rows[i].idTijdslot,
+                    "idSlot": rows[i].idSlot,
                     "idSpreker": rows[i].idSpreker,
                     "onderwerpSlot": rows[i].onderwerpSlot,
                     "zaalNummer": rows[i].zaalNummer,
@@ -117,13 +91,14 @@ Spreker.getAanvraag = function(obj, callback){
         })
     });
 };
+
 Spreker.aanvraagPlaatsen  = function(obj, callback) {
     var query = "INSERT INTO `Aanvragen` VALUES(?,?,?,?,?,?,?,?)";
     mysql.connection(function (err, conn) {
         if (err) {
             return callback(err);
         }
-        conn.query(query, [obj.idTijdslot, obj.idSpreker, obj.onderwerpSlot, obj.zaalNummer, obj.beginTijd, obj.eindTijd, obj.keuzeType, obj.datum ], function (err, rows) {
+        conn.query(query, [obj.idSlot, obj.idSpreker, obj.onderwerpSlot, obj.zaalNummer, obj.beginTijd, obj.eindTijd, obj.keuzeType, obj.datum ], function (err, rows) {
             if (err) {
                 return callback(err,null);
             } else{
@@ -133,6 +108,39 @@ Spreker.aanvraagPlaatsen  = function(obj, callback) {
     })
 };
 
-Spreker.updateSpreker
+Spreker.getSlotStatus = function(obj, callback){
+    var query = "SELECT status from `Slot` WHERE idSlot = ?";
+    mysql.connection(function (err, conn){
+        if(err) {
+            return callback(err);
+        } 
+        conn.query(query, [obj.idSlot, obj.status], function (err, rows){
+            var status = rows[0].status;
+            if(err){ 
+                    return callback(err, null);
+            } else {
+                return callback(null, status)
+            }
+        })
+    })
+};
+
+Spreker.occupySlot = function(obj, callback){
+    var query = "UPDATE `Slot` SET `Status`='Onder voorbehoud' WHERE idSlot = ?";
+    mysql.connection(function (err, conn){
+        if(err){
+            return callback(err);
+        }
+        conn.query(query, [obj.idSlot], function (err, rows){
+            if(err) {
+                //return callback(null, err);
+                console.log(err);
+            }
+            else {
+                return callback(null, rows)
+            }
+        })
+    })
+};
 
 module.exports = Spreker;

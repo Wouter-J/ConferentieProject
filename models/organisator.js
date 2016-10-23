@@ -125,7 +125,7 @@ Organisator.allowRequest = function(obj, callback){
         if(err){
             return callback(err);
         }
-        conn.query(query, [obj.idTijdslot, obj.idSpreker, obj.onderwerpSlot, obj.zaalNummer,obj.beginTijd,obj.eindTijd ], function (err, rows){
+        conn.query(query, [obj.idSlot, obj.idSpreker, obj.onderwerpSlot, obj.zaalNummer,obj.beginTijd,obj.eindTijd ], function (err, rows){
             if(err) {
                 //return callback(null, err);
                 console.log(err);
@@ -137,5 +137,21 @@ Organisator.allowRequest = function(obj, callback){
     })
 }
 
-
+Organisator.takeSlot = function(obj, callback){
+    var query = "UPDATE `Slot` SET `Status`='Bezet' WHERE idSlot = ?";
+    mysql.connection(function (err, conn){
+        if(err){
+            return callback(err);
+        }
+        conn.query(query, [obj.idSlot], function (err, rows){
+            if(err) {
+                //return callback(null, err);
+                console.log(err);
+            }
+            else {
+                return callback(null, rows)
+            }
+        })
+    })
+}
 module.exports = Organisator;

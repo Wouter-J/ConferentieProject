@@ -21,22 +21,21 @@
                     <th>Keuze</th>
                     </tr>
                     <tr>
-                        1 = beschikbaar, 2 = Onder voorbehoud 3 = bezet
                         {% for slot in slot_items %}
                          <tr>
                             <td>{{slot.beginTijd}} - {{slot.eindTijd}}</td>   
                             <td>Zaal: {{slot.Zaal}}</td>
-                            <td>{{slot.statusID}}</td>
+                            <td>{{slot.status}}</td>
                             <td>
                               <form action="/slotKeuze" method="post">
-                                <input value ="{{slot.idSlot}}" name ="idSlot" >
-                                <input value ="{{slot.Zaal}}" name ="zaalnummer" >
-                                <input value ="{{slot.beginTijd}}" name ="beginTijd" >
-                                <input value ="{{slot.eindTijd}}" name ="eindTijd" >
+                                <input type="hidden" value ="{{slot.idSlot}}" name ="idSlot" >
+                                <input type="hidden" value ="{{slot.Zaal}}" name ="zaalnummer" >
+                                <input type="hidden" value ="{{slot.beginTijd}}" name ="beginTijd" >
+                                <input type="hidden" value ="{{slot.eindTijd}}" name ="eindTijd" >
                                  <select id="keuzeType" name="keuzeType">
                                     <option value='Geen'>Niet spreken</option>
                                     <option value='eersteKeuze'>Eerste keuze</option>
-                                    <option value="tweedeKeuze">Tweede keuze</option>
+                                    <!-- <option value="tweedeKeuze">Tweede keuze</option> -->
                                 </select> 
                             </td>
                             <td>

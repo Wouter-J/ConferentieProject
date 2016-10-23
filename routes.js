@@ -5,7 +5,6 @@ var sess;
 
 //Includes
 var passwordHash = require('password-hash');
-var Agenda  =require('./models/agenda.js');
 var Annuleren  =require('./models/annuleren.js');
 var Tijdslot = require('./models/tijdslot.js');
 var Spreker = require('./models/spreker.js');
@@ -527,7 +526,7 @@ router.post('/slotToekennen', function(req,res){
             } else {
                 //Variable time
                 var idSpreker = callback[0].idSpreker;
-                var idTijdslot = callback[0].idTijdslot;
+                var idSlot = callback[0].idSlot;
                 var onderwerpSlot = callback[0].onderwerpSlot;
                 var zaalNummer = callback[0].zaalNummer;
                 var beginTijd = callback[0].beginTijd;
@@ -535,7 +534,7 @@ router.post('/slotToekennen', function(req,res){
                 
                 var post = {
                     idSpreker: idSpreker,
-                    idTijdslot: idTijdslot,
+                    idSlot: idSlot,
                     onderwerpSlot: onderwerpSlot,
                     zaalNummer: zaalNummer,
                     beginTijd: beginTijd,
@@ -547,6 +546,11 @@ router.post('/slotToekennen', function(req,res){
                             console.log(err);
                             //Error scherm
                         } else {
+                            Organisator.takeSlot(post, function(err, callback){
+                            if(err) {
+                                console.log(err);
+                                //Error scherm
+                            } else {
                             console.log("Aanvraag toegevoegd aan agenda");
                             var post = { idSpreker: idSpreker}
                             Organisator.denyRequest(post, function(err, callback){
@@ -558,6 +562,8 @@ router.post('/slotToekennen', function(req,res){
                                     //deletescherm
                                   }
                             }) 
+                        }
+                            })
                         }
                 }) 
             }
@@ -578,13 +584,36 @@ router.post('/slotKeuze', function(req, res){
        datum: new Date()
    }
    console.log(post);
-   Spreker.aanvraagPlaatsen(post, function(err, callback){
+   Spreker.getSlotStatus(post, function(err, callback){
         if(err) {
             console.log(err);
             //redirect toevoegen naar error
         } else {
-            console.log("slotToegekend");
+            var status = callback;
+            if(status == 'Beschikbaar' || status == 'Onder voorbehoud'){
+                Spreker.occupySlot(post, function(err, callback){
+                if(err) {
+                    console.log(err);
+                    //redirect toevoegen naar error
+                } else {
+                    Spreker.aanvraagPlaatsen(post, function(err, callback){
+                        if(err) {
+                            console.log(err);
+                            //redirect toevoegen naar error
+                        } else {
+                            console.log("Slot keuze gemaakt");
+                            //Sucess scherm
+                        }
+                   })
+            }
+            if(status == 'Bezet'){
+                console.log('Keuze mag niet, probeer opnieuw');
+                //Bezet scherm
+            }
+        })
+            }
         }
    })
+   
 });
 module.exports = router;
