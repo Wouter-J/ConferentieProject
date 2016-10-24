@@ -50,8 +50,58 @@ Tijdslot.getSloten = function(callback){
     })
 }
 
-Tijdslot.getSlots = function(callback){
-    var query = "SELECT * FROM `Slot` ORDER BY `idSlot`";
+Tijdslot.getSlotsFriday = function(callback){
+    var query = "SELECT * FROM `Slot` ORDER BY `idSlot` LIMIT 20";
+    mysql.connection(function (err,conn){
+        if(err){
+            return callback(err);
+
+        }
+        conn.query(query, function (err, rows){
+            if(err){
+                return callback(err);
+            } var slot = [];
+            
+           for (var i = 0; i < rows.length; i++) {
+                slot.push({
+                    "idSlot": rows[i].idSlot,
+                    "beginTijd": rows[i].beginTijd,
+                    "eindTijd": rows[i].eindTijd,
+                    "Zaal" : rows[i].Zaal,
+                    "status": rows[i].status,
+                });
+            } return callback(null, slot);
+        })
+    })
+}
+
+Tijdslot.getSlotsSaturday = function(callback){
+    var query = "SELECT * FROM `Slot` WHERE idSlot >= 21 AND idSlot <= 56 ORDER BY `idSlot`";
+    mysql.connection(function (err,conn){
+        if(err){
+            return callback(err);
+
+        }
+        conn.query(query, function (err, rows){
+            if(err){
+                return callback(err);
+            } var slot = [];
+            
+           for (var i = 0; i < rows.length; i++) {
+                slot.push({
+                    "idSlot": rows[i].idSlot,
+                    "beginTijd": rows[i].beginTijd,
+                    "eindTijd": rows[i].eindTijd,
+                    "Zaal" : rows[i].Zaal,
+                    "status": rows[i].status,
+                });
+            } return callback(null, slot);
+        })
+    })
+}
+
+Tijdslot.getSlotsSunday = function(callback){
+    var query = "SELECT * FROM `Slot` WHERE idSlot >= 57 AND idSlot <= 72 ORDER BY `idSlot`";
     mysql.connection(function (err,conn){
         if(err){
             return callback(err);

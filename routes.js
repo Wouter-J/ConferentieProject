@@ -16,6 +16,8 @@ var qr = require('qr-image');
 var fs = require('fs');
 var _ = require('underscore');
 var moment = require('moment');
+var PDFDocument = require ('pdfkit');
+var sendgrid = require("sendgrid")("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");
 moment().format();
 
 router.get('/qr', function(req, res) {  
@@ -63,6 +65,10 @@ router.get('/login', function(req,res){
 router.get('/inchecken', function(req,res){
    res.render('partials/incheck.html.twig'); 
 });
+router.get('/extraKeuze', function(req,res){
+   res.render('partials/extraKeuze.html.twig'); 
+});
+
 //Agenda
 router.get('/agenda', function (req, res) { //geen klant
     console.log("Agenda geactiveerd");
@@ -375,13 +381,19 @@ router.post('/newSpreker', function (req, res){
                                                dinerZondag: req.body.dinerZondag,
                                        }
                             if(post.maaltijdType == 'maaltijdVrijdag'){
-                                res.redirect('/tijdslot2');
+                                sess = req.session;
+                                sess.dag = 'Vrijdag';
+                                res.redirect('/tijdslotVrijdag');
                             }
                             if(post.maaltijdType == 'maaltijdZaterdag'){
-                                console.log("Zaterdag");
+                                sess = req.session;
+                                sess.dag = 'Zaterdag';
+                                res.redirect('/tijdslotZaterdag');
                             }
                             if(post.maaltijdType == 'maaltijdZondag'){
-                                console.log("Zondag");
+                                sess = req.session;
+                                sess.dag = 'Zondag';
+                                res.redirect('/tijdslotZondag');
                             }
                         }
                     })
@@ -392,12 +404,30 @@ router.post('/newSpreker', function (req, res){
     });
 });
 //Ophalen sloten
-router.get('/tijdslot2', function(req, res){
-    Tijdslot.getSlots(function(err, items2){
+router.get('/tijdslotVrijdag', function(req, res){
+    Tijdslot.getSlotsFriday(function(err, items2){
             if(err){
                 console.log(err);
             } else {
-                res.render('partials/tijdslot2.html.twig', {slot_items: items2});
+                res.render('partials/tijdslotVrijdag.html.twig', {slot_items: items2});
+            }
+        })
+});
+router.get('/tijdslotZaterdag', function(req, res){
+    Tijdslot.getSlotsSaturday(function(err, items2){
+            if(err){
+                console.log(err);
+            } else {
+                res.render('partials/tijdslotZaterdag.html.twig', {slot_items: items2});
+            }
+        })
+});
+router.get('/tijdslotZondag', function(req, res){
+    Tijdslot.getSlotsSunday(function(err, items2){
+            if(err){
+                console.log(err);
+            } else {
+                res.render('partials/tijdslotZondag.html.twig', {slot_items: items2});
             }
         })
 });
@@ -602,7 +632,13 @@ router.post('/slotKeuze', function(req, res){
                             //redirect toevoegen naar error
                         } else {
                             console.log("Slot keuze gemaakt");
-                            //Sucess scherm
+                            if(sess.extraKeuze == 1) {
+                                console.log("Tweede keuze al doorgegeven");
+                                //Bedank scherm
+                            } else {
+                                res.redirect('/extraKeuze');
+                            }
+                            
                         }
                    })
             }
@@ -614,6 +650,39 @@ router.post('/slotKeuze', function(req, res){
             }
         }
    })
-   
 });
+
+router.post('/extraKeuze', function(req, res){
+    var post = {
+                   idSpreker: sess.idSpreker,
+                   idSlot: req.body.idSlot,
+                   onderwerpSlot: sess.onderwerp,
+                   zaalNummer: req.body.zaalnummer,
+                   beginTijd: req.body.beginTijd,
+                   eindTijd: req.body.eindTijd,
+                   keuzeType: req.body.keuzeType,
+                   datum: new Date(),
+                   keuze: req.body.keuze,
+                   dag: 'Vrijdag',
+           }
+    sess = req.session;
+    sess.extraKeuze = 1;
+    if(post.keuze == 'Ja'){
+        if(post.dag == 'Vrijdag'){
+                res.redirect('/tijdslotVrijdag');
+        }
+        if(post.dag == 'Zaterdag'){
+                res.redirect('/tijdslotZaterdag');
+        }
+        if(post.dag == 'Zondag'){
+                res.redirect('/tijdslotZondag');
+        }
+    }
+    if(post.keuze == 'Nee'){
+        console.log("Nee");
+        //Scherm redirect naar sucess & bedankt scherm
+    }
+})
+
+
 module.exports = router;
