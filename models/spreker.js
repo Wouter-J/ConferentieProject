@@ -12,6 +12,7 @@ var Spreker = function(){
     rol = '';
     idMaaltijd = '';
     status = '';
+    id = '';
 }
 
 Spreker.newSpreker = function(obj, callback) {
@@ -142,5 +143,56 @@ Spreker.occupySlot = function(obj, callback){
         })
     })
 };
+
+Spreker.addTag = function(obj, callback) {
+    var query = "INSERT INTO `Tags` VALUES(NULL,?)";
+    mysql.connection(function (err, conn) {
+        if (err) {
+            return callback(err);
+        }
+        conn.query(query, [obj.naamTag], function (err, rows) {
+            if (err) {
+                return callback(err,null);
+            } else{
+                return callback(null, rows);
+            }
+        });
+    })
+};
+
+Spreker.selectTag = function(obj, callback) {
+    var query = "SELECT id from `Tags` WHERE naamTag = ?";
+    mysql.connection(function (err, conn) {
+        if (err) {
+            return callback(err);
+        }
+        conn.query(query, [obj.naamTag, obj.id], function (err, rows) {
+            var idTag = rows[0].id;
+            if (err) {
+                return callback(err,null);
+            } else{
+                return callback(null, idTag);
+            }
+        });
+    })
+};
+
+Spreker.insertTagAanvraag  = function(obj, callback) {
+    var query = "INSERT INTO `AanvraagTags` VALUES(?,?)";
+    mysql.connection(function (err, conn) {
+        if (err) {
+            return callback(err);
+        }
+        conn.query(query, [obj.idSpreker, obj.idTag], function (err, rows) {
+            console.log(obj.idSpreker);
+            console.log(obj.idTag);
+            if (err) {
+                return callback(err,null);
+            } else{
+                return callback(null, rows);
+            }
+        });
+    })
+}; 
 
 module.exports = Spreker;

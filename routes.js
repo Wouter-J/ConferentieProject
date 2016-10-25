@@ -68,6 +68,9 @@ router.get('/inchecken', function(req,res){
 router.get('/extraKeuze', function(req,res){
    res.render('partials/extraKeuze.html.twig'); 
 });
+router.get('/reservering', function(req,res){
+   res.render('partials/reservering.html.twig'); 
+});
 
 //Agenda
 router.get('/agenda', function (req, res) { //geen klant
@@ -86,7 +89,10 @@ router.get('/agenda', function (req, res) { //geen klant
 router.post('/newReservering', function (req, res){
     var code = qr.image(passwordHash.generate(req.body.email + req.body.ticketType), { type: 'png' });
     var output = fs.createWriteStream('memes.png');
-    code.pipe(output);  
+    var code2 = qr.image(passwordHash.generate(req.body.lunchVrijdag + req.body.email), { type: 'png' });
+    var output2 = fs.createWriteStream('maaltijd.png');
+    code.pipe(output); 
+    code2.pipe(output2);
 
    var post = {
        email: req.body.email,
@@ -120,6 +126,7 @@ router.post('/newReservering', function (req, res){
                     //session list
                     sess = req.session;
                     sess.ticketID = callback;
+                    sess.hashCode = passwordHash.generate(req.body.email + req.body.ticketType);
                     sess.ticketType = req.body.ticketType;
                     sess.ticketVrijdag = req.body.ticketVrijdag;
                     sess.ticketZaterdag = req.body.ticketZaterdag;
@@ -196,7 +203,8 @@ router.get('/betalen', function(req, res){
         lunchZaterdag: sess.lunchZaterdag, 
         dinerZaterdag: sess.dinerZaterdag, 
         lunchZondag: sess.lunchZondag, 
-        dinerZondag: sess.dinerZondag
+        dinerZondag: sess.dinerZondag,
+        hashCode: sess.hashCode
     }
     //Clean the array's of their pesky comma business.
     post.ticketVrijdag = post.ticketVrijdag.join("");
@@ -254,10 +262,11 @@ router.get('/betalen', function(req, res){
                 doc = new PDFDocument;
                 doc.pipe( fs.createWriteStream('out.pdf') );
                 //maaltijdQR toevoegen
-                doc.text('Uw geweldige ticket!', 210, 0)
-                doc.image('memes.png', 0, 0, { fit: [205, 205] })
-                //doc.newPage();
-                //doc.text(session.ticketID); //verdere info toevoegen !!
+                doc.image('memes.png', 0, 0, { fit: [205, 205] });
+                doc.text('Uw code voor annuleren' +post.hashCode,
+                      {  align: 'right'});
+                doc.addPage();
+                doc.image('maaltijd.png', 0, 0, { fit: [205,205] });
                 doc.end();
                 console.log("PDF Klaar");
                 
@@ -361,6 +370,7 @@ router.post('/newSpreker', function (req, res){
                             sess = req.session;
                             sess.idSpreker = callback;
                             sess.onderwerp = req.body.onderwerp;
+                            sess.naamTag = req.body.tags;
                             console.log("Maaltijd toegevoegd");
                             var post = {       idSpreker: sess.idSpreker,
                                                onderwerp: sess.onderwerp,
@@ -379,6 +389,7 @@ router.post('/newSpreker', function (req, res){
                                                lunchZondag: req.body.lunchZondag,
                                                dinerZaterdag:req.body.dinerZaterdag,
                                                dinerZondag: req.body.dinerZondag,
+                                               naamTag: sess.naamTag
                                        }
                             if(post.maaltijdType == 'maaltijdVrijdag'){
                                 sess = req.session;
@@ -430,6 +441,98 @@ router.get('/tijdslotZondag', function(req, res){
                 res.render('partials/tijdslotZondag.html.twig', {slot_items: items2});
             }
         })
+});
+
+router.post('/slotKeuze', function(req, res){
+   console.log("Keuze doorgegeven");
+   var post = {
+       idSpreker: sess.idSpreker,
+       idSlot: req.body.idSlot,
+       onderwerpSlot: sess.onderwerp,
+       zaalNummer: req.body.zaalnummer,
+       beginTijd: req.body.beginTijd,
+       eindTijd: req.body.eindTijd,
+       keuzeType: req.body.keuzeType,
+       datum: new Date(),
+       naamTag: sess.naamTag,
+       idTag: ''
+   }
+   console.log(post);
+   Spreker.addTag(post, function(err, callback){
+        if(err) {
+          console.log(err);
+          //redirect toevoegen naar error
+         } else { 
+                       Spreker.getSlotStatus(post, function(err, callback){
+                            if(err) {
+                                console.log(err);
+                                //redirect toevoegen naar error
+                            } else {
+                                var status = callback;
+                                if(status == 'Beschikbaar' || status == 'Onder voorbehoud'){
+                                    Spreker.occupySlot(post, function(err, callback){
+                                    if(err) {
+                                        console.log(err);
+                                        //redirect toevoegen naar error
+                                    } else {
+                                        Spreker.aanvraagPlaatsen(post, function(err, callback){
+                                            if(err) {
+                                                console.log(err);
+                                                //redirect toevoegen naar error
+                                            } else {
+                                                console.log("Slot keuze gemaakt");
+                                                if(sess.extraKeuze == 1) {
+                                                    console.log("Tweede keuze al doorgegeven");
+                                                    //Bedank scherm
+                                                } else {
+                                                    res.redirect('/extraKeuze');
+                                                }
+
+                                            }
+                                       })
+                                }
+                                if(status == 'Bezet'){
+                                    console.log('Keuze mag niet, probeer opnieuw');
+                                    //Bezet scherm
+                                }
+                            })
+                                }
+              }
+             })
+         }
+   })
+});
+
+router.post('/extraKeuze', function(req, res){
+    var post = {
+                   idSpreker: sess.idSpreker,
+                   idSlot: req.body.idSlot,
+                   onderwerpSlot: sess.onderwerp,
+                   zaalNummer: req.body.zaalnummer,
+                   beginTijd: req.body.beginTijd,
+                   eindTijd: req.body.eindTijd,
+                   keuzeType: req.body.keuzeType,
+                   datum: new Date(),
+                   keuze: req.body.keuze,
+                   dag: 'Vrijdag',
+           }
+    sess = req.session;
+    sess.extraKeuze = 1;
+    if(post.keuze == 'Ja'){
+        if(post.dag == 'Vrijdag'){
+                res.redirect('/tijdslotVrijdag');
+        }
+        if(post.dag == 'Zaterdag'){
+                res.redirect('/tijdslotZaterdag');
+        }
+        if(post.dag == 'Zondag'){
+                res.redirect('/tijdslotZondag');
+        }
+    }
+    if(post.keuze == 'Nee'){
+        console.log("Nee");
+        //Scherm redirect naar sucess & bedankt scherm
+    }
 });
 
 //Organisator
@@ -601,88 +704,25 @@ router.post('/slotToekennen', function(req,res){
     }
 });
 
-router.post('/slotKeuze', function(req, res){
-   console.log("Keuze doorgegeven");
-   var post = {
-       idSpreker: sess.idSpreker,
-       idSlot: req.body.idSlot,
-       onderwerpSlot: sess.onderwerp,
-       zaalNummer: req.body.zaalnummer,
-       beginTijd: req.body.beginTijd,
-       eindTijd: req.body.eindTijd,
-       keuzeType: req.body.keuzeType,
-       datum: new Date()
-   }
-   console.log(post);
-   Spreker.getSlotStatus(post, function(err, callback){
-        if(err) {
-            console.log(err);
-            //redirect toevoegen naar error
-        } else {
-            var status = callback;
-            if(status == 'Beschikbaar' || status == 'Onder voorbehoud'){
-                Spreker.occupySlot(post, function(err, callback){
-                if(err) {
-                    console.log(err);
-                    //redirect toevoegen naar error
-                } else {
-                    Spreker.aanvraagPlaatsen(post, function(err, callback){
-                        if(err) {
-                            console.log(err);
-                            //redirect toevoegen naar error
-                        } else {
-                            console.log("Slot keuze gemaakt");
-                            if(sess.extraKeuze == 1) {
-                                console.log("Tweede keuze al doorgegeven");
-                                //Bedank scherm
-                            } else {
-                                res.redirect('/extraKeuze');
-                            }
-                            
-                        }
-                   })
-            }
-            if(status == 'Bezet'){
-                console.log('Keuze mag niet, probeer opnieuw');
-                //Bezet scherm
-            }
-        })
-            }
-        }
-   })
+router.get('/pdf', function(req,res){
+   res.render('partials/pdfTest.html.twig'); 
 });
 
-router.post('/extraKeuze', function(req, res){
-    var post = {
-                   idSpreker: sess.idSpreker,
-                   idSlot: req.body.idSlot,
-                   onderwerpSlot: sess.onderwerp,
-                   zaalNummer: req.body.zaalnummer,
-                   beginTijd: req.body.beginTijd,
-                   eindTijd: req.body.eindTijd,
-                   keuzeType: req.body.keuzeType,
-                   datum: new Date(),
-                   keuze: req.body.keuze,
-                   dag: 'Vrijdag',
-           }
-    sess = req.session;
-    sess.extraKeuze = 1;
-    if(post.keuze == 'Ja'){
-        if(post.dag == 'Vrijdag'){
-                res.redirect('/tijdslotVrijdag');
-        }
-        if(post.dag == 'Zaterdag'){
-                res.redirect('/tijdslotZaterdag');
-        }
-        if(post.dag == 'Zondag'){
-                res.redirect('/tijdslotZondag');
-        }
-    }
-    if(post.keuze == 'Nee'){
-        console.log("Nee");
-        //Scherm redirect naar sucess & bedankt scherm
-    }
-})
+router.post('/testPDF', function(req, res){
+   doc = new PDFDocument;
+                doc.pipe( fs.createWriteStream('out.pdf') );
+                //maaltijdQR toevoegen
+                doc.image('memes.png', 0, 0, { fit: [205, 205] });
+                doc.text('Uw code voor annuleren' +post.hashCode,
+                      {  align: 'right'});
+                doc.addPage();
+                doc.image('maaltijd.png', 0, 0, { fit: [205,205] });
+                doc.end();
+                console.log("PDF Klaar"); 
+});
+router.post('/ReserveringV2', function (req, res){
+    
+});
 
 
 module.exports = router;

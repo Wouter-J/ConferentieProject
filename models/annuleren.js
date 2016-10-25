@@ -9,13 +9,14 @@ var Annuleren = function(){
 }
 
 Annuleren.zoekOrder = function(obj, callback){
-  var query = "SELECT ticketID from `bestelling` where hashCode = ? AND email=?";
+  var query = "SELECT ticketID from `Bestelling` where hashCode = ?";
     mysql.connection(function (err, conn) {
         if (err) {
             return callback(err);
         }
-        conn.query(query, [obj.hashCode, obj.email, obj.ticketID], function (err, rows) {
+        conn.query(query, [obj.hashCode, obj.ticketID], function (err, rows) {
             console.log("hashCode: " + obj.hashCode);
+            console.log(obj.ticketID);
             var ticketID = rows[0].ticketID;
             console.log(ticketID);
             if (err) {
