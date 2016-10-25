@@ -594,7 +594,7 @@ router.post('/checkinUser', function(req, res){
             console.log(err);
             res.render('partials/error/checkinError.html.twig');
         }
-        if(callback = 'leeg'){
+        if(callback == 'leeg'){
             res.render('partials/error/checkinError.html.twig');
         }
         else {
