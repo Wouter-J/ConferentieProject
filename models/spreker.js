@@ -94,12 +94,12 @@ Spreker.getAanvraag = function(obj, callback){
 };
 
 Spreker.aanvraagPlaatsen  = function(obj, callback) {
-    var query = "INSERT INTO `Aanvragen` VALUES(?,?,?,?,?,?,?,?)";
+    var query = "INSERT INTO `Aanvragen` VALUES(?,?,?,?,?,?,?,?,?,?,?)";
     mysql.connection(function (err, conn) {
         if (err) {
             return callback(err);
         }
-        conn.query(query, [obj.idSlot, obj.idSpreker, obj.onderwerpSlot, obj.zaalNummer, obj.beginTijd, obj.eindTijd, obj.keuzeType, obj.datum ], function (err, rows) {
+        conn.query(query, [obj.idSlot, obj.idSpreker, obj.onderwerpSlot, obj.zaalNummer, obj.beginTijd, obj.eindTijd, obj.keuzeType, obj.datum, obj.naam, obj.tussenvoegsel, obj.achternaam ], function (err, rows) {
             if (err) {
                 return callback(err,null);
             } else{

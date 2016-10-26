@@ -377,6 +377,9 @@ router.post('/newSpreker', function (req, res){
                             sess.idSpreker = callback;
                             sess.onderwerp = req.body.onderwerp;
                             sess.naamTag = req.body.tags;
+                            sess.naam = req.body.naam;
+                            sess.tussenvoegsel = req.body.tussenvoegsel;
+                            sess.achternaam = req.body.achternaam;
                             console.log("Maaltijd toegevoegd");
                             var post = {       idSpreker: sess.idSpreker,
                                                onderwerp: sess.onderwerp,
@@ -461,7 +464,10 @@ router.post('/slotKeuze', function(req, res){
        keuzeType: req.body.keuzeType,
        datum: new Date(),
        naamTag: sess.naamTag,
-       idTag: ''
+       idTag: '',
+       naam: sess.naam,
+       tussenvoegsel: sess.tussenvoegsel,
+       achternaam: sess.achternaam
    }
    console.log(post);
    Spreker.addTag(post, function(err, callback){
@@ -674,6 +680,16 @@ router.post('/slotToekennen', function(req,res){
                     //Error scherm
                 } else {
                     console.log("Aanvraag verwijderd");
+                    sendgrid.send({
+                       to:       'wouter97@planet.nl',
+                       cc:       'wouterjansen97@gmail.com',
+                       from:     'info@conferentieStorm.nl',
+                       subject:  'Afwijzing spreek slot',
+                       text: 'Bedankt voor uw aanvraag maar uw aanvraag is helaas niet geacepteerd, u kunt eventueel nog een ander slot aanvraag. Onze excuses',
+                       }, function(err, json) {
+                       if (err) { return console.error(err); }
+                       console.log(json);
+                    });
                     //deletescherm
                 }
         })
@@ -691,7 +707,21 @@ router.post('/slotToekennen', function(req,res){
                 var zaalNummer = callback[0].zaalNummer;
                 var beginTijd = callback[0].beginTijd;
                 var eindTijd = callback[0].eindTijd;
-                
+                var naam = callback[0].naam;
+                var tussenvoegsel = callback[0].tussenvoegsel;
+                var achternaam = callback[0].achternaam;
+                sess = req.session;
+                sess.dag = '';
+                    if(idSlot <= 20){
+                        sess.dag = 'Vrijdag';
+                    }
+                    if(idSlot >= 20 && idSlot <= 56){
+                        sess.dag = 'Zaterdag';
+                    }
+                    if(idSlot >= 56 && idSlot <= 73){
+                        sess.dag = 'Zaterdag';
+                    }
+                }
                 var post = {
                     idSpreker: idSpreker,
                     idSlot: idSlot,
@@ -719,18 +749,27 @@ router.post('/slotToekennen', function(req,res){
                                     //Error scherm
                                 } else {
                                     console.log("Aanvraag verwijderd");
-                                    //deletescherm
-                                  }
-                            }) 
-                        }
+                                    sendgrid.send({
+                                            to:       'wouter97@planet.nl',
+                                            cc:       'wouterjansen97@gmail.com',
+                                            from:     'info@conferentieStorm.nl',
+                                            subject:  'Acceptatie spreek slot',
+                                            text:     'Bedankt voor uw aanvraag ' + naam + ' ' + tussenvoegsel + ' ' + achternaam + ' U zal spreken vanaf ' + beginTijd + '-' + eindTijd + ' Op de volgende dag: ' + sess.dag + ' tot dan!',
+                                            }, function(err, json) {
+                                            if (err) { return console.error(err); }
+                                            console.log(json);
+                                    });
+                                    //geaccepteerdScherm
+                                }
+                            })
+                            }
                             })
                         }
-                }) 
-            }
-        }) 
+                })
+        })
     }
 });
-
+                                    
 router.get('/pdf', function(req,res){
    res.render('partials/pdfTest.html.twig'); 
 });
