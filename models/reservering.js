@@ -1,4 +1,8 @@
 var mysql = require('../db.js');
+var PDFDocument = require ('pdfkit');
+var fs = require('fs');
+var qr = require('qr-image');
+var passwordHash = require('password-hash');
 
 var Reservering = function(){
     ticketID = '';
@@ -203,5 +207,96 @@ Reservering.newOrder = function(obj, callback) {
         })
     })
 };
+
+Reservering.createPDF = function(obj, callback){
+    var query = "SELECT * FROM `Bestelling` WHERE `ticketID` = ?";
+    mysql.connection(function (err,conn){
+        if(err){
+            return callback(err);
+        }
+        conn.query(query, [obj.ticketID], function (err, rows){
+            if(err){
+                return callback(err);
+            } 
+            var tijdslot = [];
+            var doc = new PDFDocument;
+            doc.pipe( fs.createWriteStream('test.pdf') );
+            for(var i=0;i<rows.length;i++){
+                   doc.text('Uw code voor annuleren' + rows[i].hashCode,{  align: 'right'});
+            }
+            var query = "SELECT * FROM `Tickets` WHERE `ticketID` = ?";
+                mysql.connection(function (err,conn){
+                    if(err){
+                        return callback(err);
+                    }
+                    conn.query(query, [obj.ticketID], function (err, rows){
+                        if(err){
+                            return callback(err);
+                    } 
+                for(var i=0;i<rows.length;i++){
+                    console.log(rows[i].ticketVrijdag);
+                    if(rows[i].ticketVrijdag != 0){
+                        var ticketVrijdag = qr.imageSync((rows[i].ticketVrijdag + obj.email),{ type: 'png' });
+                        doc.image(ticketVrijdag, 0, 0, { fit: [205, 205] });
+                        doc.addPage();
+                    }
+                    console.log(rows[i].ticketZaterdag);
+                    if(rows[i].ticketZaterdag != 0){
+                        var ticketZaterdag = qr.imageSync((rows[i].ticketZaterdag + obj.email),{ type: 'png' });
+                        doc.image(ticketZaterdag, 0, 0, { fit: [205, 205] });
+                        doc.addPage();
+                    }
+                    console.log(rows[i].ticketZondag);
+                    if(rows[i].ticketZondag != 0){
+                        var ticketZondag = qr.imageSync((rows[i].ticketZondag + obj.email),{ type: 'png' });
+                        doc.image(ticketZondag, 0, 0, { fit: [205, 205] });
+                        doc.addPage();
+                    }
+                }
+            var query = "SELECT * FROM `Maaltijd` WHERE `ticketID` = ?";
+            mysql.connection(function (err,conn){
+                if(err){
+                    return callback(err);
+                }
+                conn.query(query, [obj.ticketID], function (err, rows){
+                    if(err){
+                        return callback(err);
+                    }
+                for(var i=0;i<rows.length;i++){
+                    doc.text('maaltijd'); //verdere in info toevoegen !!
+                    if(rows[i].lunchVrijdag != 0){
+                        var lunchVrijdag = qr.imageSync((rows[i].lunchVrijdag + obj.email),{ type: 'png' });
+                        doc.image(lunchVrijdag, 0, 0, { fit: [205, 205]});
+                        doc.addPage();
+                    }
+                    if(rows[i].lunchZaterdag != 0){
+                        var lunchZaterdag = qr.imageSync((rows[i].lunchZaterdag + obj.email),{ type: 'png' });
+                        doc.image(lunchZaterdag, 0, 0, { fit: [205, 205]});
+                        doc.addPage();
+                    }
+                    if(rows[i].dinerZaterdag != 0){
+                        var dinerZaterdag = qr.imageSync((rows[i].dinerZaterdag + obj.email),{ type: 'png' });
+                        doc.image(dinerZaterdag, 0, 0, { fit: [205, 205]});
+                        doc.addPage();
+                    }
+                    if(rows[i].lunchZondag != 0){
+                        var lunchZondag = qr.imageSync((rows[i].lunchZondag + obj.email),{ type: 'png' });
+                        doc.image(lunchZondag, 0, 0, { fit: [205, 205]});
+                        doc.addPage();
+                    }
+                    if(rows[i].dinerZondag != 0){
+                        var dinerZondag = qr.imageSync((rows[i].dinerZondag + obj.email),{ type: 'png' });
+                        doc.image(dinerZondag, 0, 0, { fit: [205, 205]});
+                    }
+                }
+                doc.end();
+                return callback(null, tijdslot);
+                })
+            })
+        })
+    })
+})
+    })
+}
 
 module.exports = Reservering;

@@ -142,8 +142,10 @@ router.post('/newReservering', function (req, res){
                     sess.lunchZondag= req.body.lunchZondag;
                     sess.dinerZaterdag =req.body.dinerZaterdag;
                     sess.dinerZondag = req.body.dinerZondag;
+                    sess.email = req.body.email;
                     
                    var post = {
+                       email: sess.email,
                        ticketID: sess.ticketID,
                        maaltijdType: req.body.maaltijdType,
                        ticketType: req.body.ticketType,
@@ -199,6 +201,7 @@ router.post('/newReservering', function (req, res){
 router.get('/betalen', function(req, res){
     console.log("Prijs Berekening"); 
     var post = {
+        email: sess.email,
         ticketType: sess.ticketType, 
         maaltijdType: sess.maaltijdType, 
         ticketVrijdag: sess.ticketVrijdag, 
@@ -251,20 +254,20 @@ router.get('/betalen', function(req, res){
             console.log(solution);
             
             //verdere calculaties en solution toevoegen
-            if(lunch = 1){
+            if(lunch == 1){
                 var lunchCalculation = 20 * post.lunchVrijdag;
                 var lunchCalculation2 = 20 * post.lunchZaterdag;
                 var lunchCalculation3 = 20 * post.lunchZondag;
                 var lunchSolution = lunchCalculation + lunchCalculation2 + lunchCalculation3;
             }
-            if(diner = 1){
+            if(diner == 1){
                 var dinerCalculation = 30 * post.dinerZaterdag;
                 var dinerCalculation2 = 30 * post.dinerZondag;
                 var dinerSolution = dinerCalculation + dinerCalculation2;
             }
             var foodSolution = dinerSolution + lunchSolution;
             var completePrice = foodSolution + solution;
-            
+            /*
                 doc = new PDFDocument;
                 doc.pipe( fs.createWriteStream('out.pdf') );
                 //maaltijdQR toevoegen
@@ -275,7 +278,7 @@ router.get('/betalen', function(req, res){
                 doc.image('maaltijd.png', 0, 0, { fit: [205,205] });
                 doc.end();
                 console.log("PDF Klaar");
-                
+            */   
             res.render('partials/betalen.html.twig', {
                 solution: solution, 
                 priceTicket: priceTicket, 
@@ -292,20 +295,47 @@ router.get('/betalen', function(req, res){
 router.post('/confirmOrder', function(req,res){
 //Mailing-shizzay    
     console.log("Order bevestigd");
-    fs.readFile('out.pdf', function(err, data) {
-        sendgrid.send({
-                to:       'wouter97@planet.nl',
-                cc:       'wouterjansen97@gmail.com',
-                from:     'info@conferentieStorm.nl',
-                subject:  'Uw conferentie tickets',
-                text:     'Veel plezier!',
-                files     : [{filename: 'out.pdf', path: 'out.pdf', content: data, contentType:'application/pdf'}],
-                }, function(err, json) {
-                if (err) { return console.error(err); }
-                console.log(json);
-        });
-    }); 
-    res.render('partials/sucess/betalingGelukt.html.twig');
+    var post = {
+        email: sess.email,
+        ticketID: '',
+        hashCode: sess.hashCode
+    }
+    Reservering.getTicketID(post, function(err, callback){  
+            if(err){
+                console.log(err);
+            } else {
+                var post = {ticketID: callback}
+                console.log("Start PDF");
+                Reservering.createPDF(post, function(err, items2){
+                        if(err){
+                            console.log(err);
+                        } else {
+                         setTimeout(function(){
+                            fs.readFile('./test.pdf', function(err, data) {
+                                if(err){
+                                    console.log(err);
+                                }
+                                console.log(data);
+                                sendgrid.send({
+                                    to: sess.email,
+                                    cc: 'wouter97@planet.nl',
+                                    from: 'info@conferentieStorm.nl',
+                                    subject: 'Uw conferentie tickets',
+                                    files     : [{filename: 'test.pdf', content: new Buffer(data.toString('base64'), 'base64'), contentType: 'application/pdf'}],
+                                    html      : 'Bedankt voor uw bestelling, hierbij uw tickets!'
+                                    }, function (err, json) {
+                                        if (err) {
+                                        console.log(path.resolve(process.cwd(), 'out.pdf' ));
+                                        return console.error(err);
+                                        } console.log(json);
+                                    });
+                                    res.render('partials/sucess/betalingGelukt.html.twig');
+                            });
+                         },3000);
+                     }
+                })
+            }
+    })
 });
 
  //Reservering annuleren
@@ -783,20 +813,41 @@ router.get('/pdf', function(req,res){
 });
 
 router.post('/testPDF', function(req, res){
-    /* var code = qr.image(passwordHash.generate(req.body.email + req.body.ticketType), { type: 'png' });
-    var output = fs.createWriteStream('memes.png');
-    var code2 = qr.image(passwordHash.generate(req.body.lunchVrijdag + req.body.email), { type: 'png' });
-    var output2 = fs.createWriteStream('maaltijd.png'); */
-   doc = new PDFDocument;
-                doc.pipe( fs.createWriteStream('out.pdf') );
-                //maaltijdQR toevoegen
-                doc.image('memes.png', 0, 0, { fit: [205, 205] });
-                doc.text('Uw code voor annuleren' +post.hashCode,
-                      {  align: 'right'});
-                doc.addPage();
-                doc.image('maaltijd.png', 0, 0, { fit: [205,205] });
-                doc.end();
-                console.log("PDF Klaar"); 
+    var post = {
+        hashCode: 'memes',
+        email:req.body.email,
+        ticketID: 1,
+    }
+    Reservering.createPDF(post, function(err, items2){
+            if(err){
+                console.log(err);
+            } else {
+             setTimeout(function(){
+                            fs.readFile('./test.pdf', function(err, data) {
+                                if(err){
+                                    console.log(err);
+                                }
+                                    console.log(data);
+                                sendgrid.send({
+                                    to: req.body.email,
+                                    cc: 'wouter97@planet.nl',
+                                    from: 'info@conferentieStorm.nl',
+                                    subject: 'Uw conferentie tickets',
+                                    text: 'Beste ' + req.body.naam + '\n' + 'hier zijn uw tickets in de bijlage.',
+                                    files     : [{filename: 'test.pdf', content: new Buffer(data.toString('base64'), 'base64'), contentType: 'application/pdf'}],
+                                    html      : 'bla bla'
+                                }, function (err, json) {
+                                    if (err) {
+                                        console.log(path.resolve(process.cwd(), 'out.pdf' ));
+                                        return console.error(err);
+                                    } console.log(json);
+                                });
+                                res.render('partials/sucess/betalingGelukt.html.twig');
+
+                                });
+             },3000);
+            }
+    });
 });
 router.post('/ReserveringV2', function (req, res){
     
