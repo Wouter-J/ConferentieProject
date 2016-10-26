@@ -361,11 +361,6 @@ router.post('/newSpreker', function (req, res){
        dinerZondag: req.body.dinerZondag,
    }; 
     console.log(post);
-    Reservering.newMaaltijd(post, function(err, callback){
-        if(err) {
-            console.log(err);
-            //redirect toevoegen naar error
-        } else {
             Spreker.newSpreker(post, function(err, callback){
                 if(err) { console.log(err); }
                 else {
@@ -400,29 +395,42 @@ router.post('/newSpreker', function (req, res){
                                                dinerZondag: req.body.dinerZondag,
                                                naamTag: sess.naamTag
                                        }
-                            if(post.maaltijdType == 'maaltijdVrijdag'){
-                                sess = req.session;
-                                sess.dag = 'Vrijdag';
-                                res.redirect('/tijdslotVrijdag');
+                                console.log(post);
+                                Reservering.newMaaltijd(post, function(err, callback){
+                                if(err) {
+                                    console.log(err);
+                                    //redirect toevoegen naar error
+                                } else {
+                                    Reservering.updateSpreker(post, function(err, callback){
+                                        if(err) {
+                                            console.log(err);
+                                            //redirect toevoegen naar error
+                                        } else {
+                                            if(post.maaltijdType == 'maaltijdVrijdag'){
+                                                sess = req.session;
+                                                sess.dag = 'Vrijdag';
+                                                res.redirect('/tijdslotVrijdag');
+                                            }
+                                            if(post.maaltijdType == 'maaltijdZaterdag'){
+                                                sess = req.session;
+                                                sess.dag = 'Zaterdag';
+                                                res.redirect('/tijdslotZaterdag');
+                                            }
+                                            if(post.maaltijdType == 'maaltijdZondag'){
+                                                sess = req.session;
+                                                sess.dag = 'Zondag';
+                                                res.redirect('/tijdslotZondag');
+                                            }
+                                        }
+                                    })
                             }
-                            if(post.maaltijdType == 'maaltijdZaterdag'){
-                                sess = req.session;
-                                sess.dag = 'Zaterdag';
-                                res.redirect('/tijdslotZaterdag');
-                            }
-                            if(post.maaltijdType == 'maaltijdZondag'){
-                                sess = req.session;
-                                sess.dag = 'Zondag';
-                                res.redirect('/tijdslotZondag');
-                            }
-                        }
-                    })
-                    
-                }
-            }) 
-        }
+                        })
+
+                    }
+                }) 
+            }
+        });
     });
-});
 //Ophalen sloten
 router.get('/tijdslotVrijdag', function(req, res){
     Tijdslot.getSlotsFriday(function(err, items2){
@@ -769,12 +777,16 @@ router.post('/slotToekennen', function(req,res){
         })
     }
 });
-                                    
+//Temp-testing                                    
 router.get('/pdf', function(req,res){
    res.render('partials/pdfTest.html.twig'); 
 });
 
 router.post('/testPDF', function(req, res){
+    /* var code = qr.image(passwordHash.generate(req.body.email + req.body.ticketType), { type: 'png' });
+    var output = fs.createWriteStream('memes.png');
+    var code2 = qr.image(passwordHash.generate(req.body.lunchVrijdag + req.body.email), { type: 'png' });
+    var output2 = fs.createWriteStream('maaltijd.png'); */
    doc = new PDFDocument;
                 doc.pipe( fs.createWriteStream('out.pdf') );
                 //maaltijdQR toevoegen

@@ -25,7 +25,7 @@ var Reservering = function(){
 }
 
 Reservering.newMaaltijd = function(obj, callback){
-    var query = "INSERT INTO `Maaltijd` VALUES (NULL, ?, ?, ?, ?, ?, ?)";
+    var query = "INSERT INTO `Maaltijd` VALUES (NULL, ?, ?, ?, ?, ?, ?,?)";
     mysql.connection(function (err, conn){
         if(err) {
             return callback(err);
@@ -37,7 +37,7 @@ Reservering.newMaaltijd = function(obj, callback){
         obj.lunchZondag = obj.lunchZondag.join("");
         obj.dinerZondag = obj.dinerZondag.join("");
 
-        conn.query(query, [obj.ticketID, obj.lunchVrijdag, obj.lunchZaterdag, obj.dinerZaterdag, obj.lunchZondag, obj.dinerZondag], function (err, rows){
+        conn.query(query, [obj.ticketID, obj.lunchVrijdag, obj.lunchZaterdag, obj.dinerZaterdag, obj.lunchZondag, obj.dinerZondag, obj.idSpreker], function (err, rows){
             if(err){
                 return callback(err, null);
             } else {
@@ -45,6 +45,37 @@ Reservering.newMaaltijd = function(obj, callback){
             }
         })
     })
+};
+
+Reservering.updateSpreker = function(obj, callback){
+    var query = "SELECT idMaaltijd FROM `Maaltijd` WHERE idSpreker = ?";
+        mysql.connection(function (err, conn){
+        if(err) {
+            return callback(err);
+        }
+        conn.query(query, [obj.idSpreker, obj.idMaaltijd], function (err, rows){
+            var idMaaltijd = rows[0].idMaaltijd
+            if(err){
+                return callback(err, null);
+            } else {
+                obj.idMaaltijd = idMaaltijd;
+                console.log("IDMAALTIJD " +obj.idMaaltijd)
+                var query2 = "UPDATE `Spreker` SET idMaaltijd = ? WHERE idSpreker = ?";
+                    mysql.connection(function (err, conn){
+                        if(err) {
+                            return callback(err);
+                        }
+                        conn.query(query2, [obj.idMaaltijd, obj.idSpreker], function (err, rows){
+                            if(err){
+                                return callback(err, null);
+                            } else {
+                                return callback(null, rows);
+                            }
+                        })
+                    })
+                }
+            })
+        })
 };
 
 Reservering.newTicket = function(obj, callback){
