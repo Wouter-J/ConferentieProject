@@ -7,6 +7,7 @@ var Organisator = function () {
     incheckTijd = '';
     aantalGebruikersBinnen = '';
     email = '';
+    totaalAantalTickets = '';
 };
 
 Organisator.loginUser = function (obj, callback){
@@ -58,11 +59,6 @@ Organisator.getUser = function(obj, callback){
             return callback(err);
         }
         conn.query(query, [obj.email, obj.ticketID], function (err, rows) {
-            if(obj.ticketID == undefined || obj.ticketID == '') {
-                console.log("Undefined");
-                var ticketError = 'leeg';
-                return callback(null, ticketError)
-            }
             console.log("email: " + obj.email);
             var ticketID = rows[0].ticketID;
             if (err) {
@@ -70,6 +66,25 @@ Organisator.getUser = function(obj, callback){
                 return callback(err,null);
             } else{
                 return callback(null, ticketID);
+            }
+        });
+  });
+};
+
+Organisator.getAantalGebruikers = function(obj, callback){
+    var query = "SELECT totaalAantalTickets FROM `Bestelling` where email = ?"; 
+     mysql.connection(function (err, conn) {
+        if (err) {
+            return callback(err);
+        }
+        conn.query(query, [obj.email, obj.totaalAantalTickets], function (err, rows) {
+            var totaalAantalTickets = rows[0].totaalAantalTickets;
+            console.log("gebr " + totaalAantalTickets)
+            if (err) {
+                console.log("err");
+                return callback(err,null);
+            } else{
+                return callback(null, totaalAantalTickets);
             }
         });
   });
@@ -96,6 +111,31 @@ Organisator.getGebruikers = function(callback){
                 });
             }
             return callback(null, gebruikers);
+        })
+    });
+};
+
+Organisator.getTickets = function(callback){
+    var query = "SELECT * FROM `Bestelling` ORDER BY `ticketID` ASC;";
+    mysql.connection(function (err, conn) {
+        if (err) {
+            return callback(err);
+        }
+        conn.query(query, function (err, rows) {
+            if (err) {
+                return callback(err);
+            }
+            var bestellingen = [];
+
+            for (var i = 0; i < rows.length; i++) {
+                bestellingen.push({
+                    "ticketID": rows[i].ticketID,
+                    "email": rows[i].email,
+                    "ticketType": rows[i].ticketType,
+                    "totaalAantalTickets": rows[i].totaalAantalTickets,
+                });
+            }
+            return callback(null, bestellingen);
         })
     });
 };

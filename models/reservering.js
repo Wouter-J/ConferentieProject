@@ -21,6 +21,7 @@ var Reservering = function(){
     lunchZondag = '';
     dinerZaterdag = '';
     dinerZondag = '';
+    totaalAantalTickets = '';
 }
 
 Reservering.newMaaltijd = function(obj, callback){
@@ -157,12 +158,12 @@ Reservering.getTicketID = function(obj, callback){
 }; 
 
 Reservering.newOrder = function(obj, callback) {
-    var query = "INSERT INTO `Bestelling` VALUES(NULL,?,?,?,?)";
+    var query = "INSERT INTO `Bestelling` VALUES(NULL,?,?,?,?,?)";
         mysql.connection(function (err, conn){
         if(err) {
             return callback(err);
         }
-        conn.query(query, [obj.hashCode, obj.QRCode, obj.ticketType, obj.email], function (err, rows){
+        conn.query(query, [obj.hashCode, obj.QRCode, obj.ticketType, obj.email, obj.totaalAantalTickets], function (err, rows){
             if(err){
                 return callback(err, null);
             } else {
@@ -170,5 +171,6 @@ Reservering.newOrder = function(obj, callback) {
             }
         })
     })
-}
+};
+
 module.exports = Reservering;

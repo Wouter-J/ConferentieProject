@@ -93,7 +93,11 @@ router.post('/newReservering', function (req, res){
     var output2 = fs.createWriteStream('maaltijd.png');
     code.pipe(output); 
     code2.pipe(output2);
-
+    ticketVrijdag = req.body.ticketZondag.join("");
+    ticketZaterdag = req.body.ticketZondag.join("");
+    ticketZondag = req.body.ticketZondag.join("");
+    var totaalAantalTickets = (1 * ticketVrijdag) + (1 * ticketZaterdag) + (1 * ticketZondag);
+    console.log(totaalAantalTickets);
    var post = {
        email: req.body.email,
        ticketType: req.body.ticketType,
@@ -108,6 +112,7 @@ router.post('/newReservering', function (req, res){
        ticketVrijdag: req.body.ticketVrijdag,
        ticketZaterdag: req.body.ticketZaterdag,
        ticketZondag: req.body.ticketZondag,
+       totaalAantalTickets: totaalAantalTickets
        //Deze oplossing kan, weekend & parse-partout zijn dan gewoon korting
     }; 
     console.log(post);
@@ -239,6 +244,7 @@ router.get('/betalen', function(req, res){
             var calculation2 = priceTicket * post.ticketZaterdag;
             var calculation3 = priceTicket * post.ticketZondag;
             var solution = calculation + calculation2 + calculation3;
+            
             console.log(calculation);
             console.log(calculation2);
             console.log(calculation3);
@@ -568,7 +574,19 @@ router.post('/loginUser', function (req, res){
         }
     })
 });
-
+//Tickets
+router.get('/ticketOverzicht', function(req, res){
+    console.log("Ophalen tickets");
+    Organisator.getTickets(function(err, items){
+                if(err) {
+                     console.log(err);
+                } else {
+                    res.render('partials/ticketOverzicht.html.twig', {
+                        bestellingen: items,
+                    });
+                }
+    });
+});
 //Actieve gebruikers
 router.get('/bezoekerOverzicht', function(req, res){
     console.log("Ophalen bezoekers");
@@ -588,32 +606,41 @@ router.post('/checkinUser', function(req, res){
     var post = {
                 email: req.body.email,
                 incheckTijd: new Date(),
+                totaalAantalTickets: ''
                }
     Organisator.getUser(post, function(err, callback){
         if(err) {
             console.log(err);
             res.render('partials/error/checkinError.html.twig');
         }
-        if(callback == 'leeg'){
-            res.render('partials/error/checkinError.html.twig');
-        }
         else {
             console.log("ticketID: " + callback);
             sess = req.session;
             sess.ticketID = callback;
-            var post = {
-                        email: req.body.email,
-                        incheckTijd: new Date(),
-                        aantalGebruikers: 3,
-                        ticketID: sess.ticketID
-                       }
-            console.log(post);
-            Organisator.checkinUser(post, function(err, callback){
+            Organisator.getAantalGebruikers(post, function(err, callback){
                 if(err) {
                     console.log(err);
                     res.render('partials/error/checkinError.html.twig');
-                } else {
-                    res.render('partials/sucess/checkinSucess.html.twig');
+                }
+                else {
+                    console.log("tickets " + callback);
+                    sess.totaalAantalTickets = callback;
+                    console.log("Aantal gebruikers " + sess.totaalAantalTickets);
+                    var post = {
+                                email: req.body.email,
+                                incheckTijd: new Date(),
+                                aantalGebruikers: sess.totaalAantalTickets,
+                                ticketID: sess.ticketID
+                               }
+                    console.log(post);
+                    Organisator.checkinUser(post, function(err, callback){
+                        if(err) {
+                            console.log(err);
+                            res.render('partials/error/checkinError.html.twig');
+                        } else {
+                            res.render('partials/sucess/checkinSucess.html.twig');
+                        }
+                    })
                 }
             })
         }
