@@ -10,6 +10,8 @@ var Tijdslot = require('./models/tijdslot.js');
 var Spreker = require('./models/spreker.js');
 var Reservering = require('./models/reservering.js');
 var Organisator = require('./models/organisator.js');
+var Feest = require('./models/feest.js');
+var Order = require('./models/order.js');
 
 //QR-Stuff
 var qr = require('qr-image');
@@ -29,7 +31,6 @@ router.get('/qr', function(req, res) {
 router.get('/', function (req, res) {
     res.render('partials/home.html.twig');
 });
-
 //InfoPagina's (Nog vullen & aanmaken)
 router.get('/aboutConference', function(req,res){
    res.render('partials/textInfo/aboutConference.html.twig'); 
@@ -71,7 +72,9 @@ router.get('/extraKeuze', function(req,res){
 router.get('/reservering', function(req,res){
    res.render('partials/reservering.html.twig'); 
 });
-
+router.get('/feestMail', function(req,res){
+   res.render('partials/feestMail.html.twig'); 
+});
 //Agenda
 router.get('/agenda', function (req, res) { //geen klant
     console.log("Agenda geactiveerd");
@@ -83,7 +86,6 @@ router.get('/agenda', function (req, res) { //geen klant
             }
         })
 });
-
 //Tickets
  //Reservering plaatsen
 router.post('/newReservering', function (req, res){
@@ -267,18 +269,7 @@ router.get('/betalen', function(req, res){
             }
             var foodSolution = dinerSolution + lunchSolution;
             var completePrice = foodSolution + solution;
-            /*
-                doc = new PDFDocument;
-                doc.pipe( fs.createWriteStream('out.pdf') );
-                //maaltijdQR toevoegen
-                doc.image('memes.png', 0, 0, { fit: [205, 205] });
-                doc.text('Uw code voor annuleren' +post.hashCode,
-                      {  align: 'right'});
-                doc.addPage();
-                doc.image('maaltijd.png', 0, 0, { fit: [205,205] });
-                doc.end();
-                console.log("PDF Klaar");
-            */   
+
             res.render('partials/betalen.html.twig', {
                 solution: solution, 
                 priceTicket: priceTicket, 
@@ -291,16 +282,40 @@ router.get('/betalen', function(req, res){
         }
     })
 });
-
 router.post('/confirmOrder', function(req,res){
 //Mailing-shizzay    
     console.log("Order bevestigd");
     var post = {
         email: sess.email,
         ticketID: '',
-        hashCode: sess.hashCode
+        hashCode: sess.hashCode,
+        ticketZaterdag: sess.ticketZaterdag
     }
-    Reservering.getTicketID(post, function(err, callback){  
+    console.log(post.ticketZaterdag);
+    post.ticketZaterdag = post.ticketZaterdag.join("");
+    console.log(post.ticketZaterdag);
+    if(post.ticketZaterdag >= 1){
+        console.log("Zaterdag keuze gemaakt!");
+        Feest.newUitnodiging(post, function(err, callback){  
+            if(err){
+                console.log(err);
+            } else {
+                console.log("Uitnodiging toegevoegd");
+                sendgrid.send({
+                    to: sess.email,
+                    cc: 'wouter97@planet.nl',
+                    from: 'info@conferentieStorm.nl',
+                    subject: 'Netwerkbijeenkomst uitnodiging',
+                    text: 'Bedankt voor uw bestelling, Er zijn netwerkbijeenkomsten op zaterdagavond, bent u geintresseerd ga dan naar: http://localhost:8000/feest',
+                }, function(err, json) {
+                    if (err) { return console.error(err); }
+                    console.log(json);
+                });
+            }
+        });
+    }
+
+   Reservering.getTicketID(post, function(err, callback){  
             if(err){
                 console.log(err);
             } else {
@@ -336,8 +351,8 @@ router.post('/confirmOrder', function(req,res){
                 })
             }
     })
+    res.render('partials/sucess/betalingGelukt.html.twig');
 });
-
  //Reservering annuleren
 router.post('/cancelReservering', function(req, res){
        var post = {
@@ -351,7 +366,7 @@ router.post('/cancelReservering', function(req, res){
     Annuleren.zoekOrder(post, function(err, callback){
         if(err) {
             console.log(err);
-            //redirect toevoegen naar error
+            res.render('partials/error/standaardError.html.twig');
         } else {
             console.log("ticketID: " + callback);
                    sess = req.session;
@@ -360,6 +375,7 @@ router.post('/cancelReservering', function(req, res){
                 Annuleren.verwijderOrder(post, function(err, callback){
                     if(err) {
                         console.log(err);
+                        res.render('partials/error/standaardError.html.twig');
                     } else {
                         console.log("Order destroy >.<");
                         //VERWIJDER EN ERROR SCHERM TOEVOEGEN, OOK CHECK OF BESTAAT, ALS TICKET NIET BESTAAT DAN NIKS DOEN
@@ -369,6 +385,132 @@ router.post('/cancelReservering', function(req, res){
     })
 });
 
+//Feest
+router.get('/feest', function (req, res) {
+    Feest.getInfo(function(err, items){
+            if(err){
+                console.log(err);
+            } else {
+                res.render('partials/feestOrder.html.twig', {feest_items: items});
+            }
+        })
+});
+
+router.post('/controleerUitnodiging', function (req, res){
+   var post = {
+       email: req.body.email,
+       sectorType: req.body.sectorType,
+   }; 
+    console.log(post);
+        Feest.controlInvite(post, function(err, callback){
+            if(err) { 
+                      console.log(err); 
+                      res.render('partials/error/standaardError.html.twig');
+                    }
+            else {
+                sess = req.session;
+                sess.emailFeest = post.email;
+                sess.sectorType = post.sectorType;
+                res.redirect('/feestTickets');
+            }
+        })
+});
+
+router.get('/feestTickets', function(req, res){
+    var post = {
+       email: sess.emailFeest,
+       sectorType: sess.sectorType,
+    }; 
+    console.log(sess.emailFeest);
+                doc = new PDFDocument;
+                doc.pipe( fs.createWriteStream('feest.pdf') );
+                doc.text('Bedankt voor uw reservering',{  align: 'right'});
+                var imageFeest = qr.imageSync((sess.emailFeest),{ type: 'png' });
+                doc.image(imageFeest, 0, 0, { fit: [205, 205] });
+                doc.end();
+    Feest.getMaxTickets(post, function(err, items){
+            if(err){
+                console.log(err);
+            } else {
+                Feest.getMaxTickets(post, function(err, items){
+                    if(err){
+                        console.log(err);
+                    } else {
+                        res.render('partials/feestTickets.html.twig', {feest_items: items});
+                    }
+                })
+            }
+    })
+});
+router.post('/confirmParty', function (req, res){
+   var post = {
+       email: sess.emailFeest,
+       gekozenSector: sess.sectorType,
+       aantalTickets: req.body.aantalTickets,
+   }; 
+    console.log(post);
+        Feest.addOrder(post, function(err, callback){
+            if(err) { 
+                      console.log(err); 
+                      res.render('partials/error/standaardError.html.twig');
+                    }
+            else {
+                Feest.update(post, function(err, callback){
+                    if(err) { 
+                        console.log(err); 
+                        res.render('partials/error/standaardError.html.twig');
+                    }
+                    if(callback == 'vol'){
+                        res.render('partials/error/feestVol.html.twig');
+                    }
+                    else {
+                        fs.readFile('feest.pdf', function(err, data) {
+                                sendgrid.send({
+                                to: sess.emailFeest,
+                                cc: 'wouter97@planet.nl',
+                                from: 'info@conferentieStorm.nl',
+                                subject: 'Uw netwerk tickets',
+                                text: 'Bedankt voor uw bestelling, hierbij uw ticket!',
+                                files     : [{filename: 'feest.pdf', path: 'feest.pdf', content: data, contentType:'application/pdf'}],
+                                }, function(err, json) {
+                                    if (err) { return console.error(err); }
+                                    console.log(json);
+                                });
+                            });    res.render('partials/sucess/betalingGelukt.html.twig');
+                    }
+                })
+            }
+        })
+});
+router.post('/sendFeestmail', function(req, res){
+   var post = {
+       adminText: req.body.adminText
+   } 
+   console.log(post);
+   Feest.sendAdminMail(post, function(err, callback){
+                if(err) { 
+                    console.log(err); 
+                    res.render('partials/error/standaardError.html.twig');
+                }
+       else {
+           sess = req.session;
+           sess.mailingList = callback;
+           console.log(sess.mailingList);
+              sendgrid.send({
+                  to: sess.mailingList,
+                  cc: 'wouter97@planet.nl',
+                  from: 'info@conferentieStorm.nl',
+                  subject: 'Gebruiker Lijst Netwerken',
+                  text: post.adminText,
+                  }, function(err, json) {
+                  if (err) { return console.error(err); }
+                  console.log(json);
+                  });
+       }
+   })
+
+   
+});
 //Spreker
 router.post('/newSpreker', function (req, res){
    var post = {
@@ -392,11 +534,15 @@ router.post('/newSpreker', function (req, res){
    }; 
     console.log(post);
             Spreker.newSpreker(post, function(err, callback){
-                if(err) { console.log(err); }
+                if(err) { 
+                            console.log(err); 
+                            res.render('partials/error/standaardError.html.twig');
+                        }
                 else {
                     Spreker.getID(post, function(err, callback){
                         if(err) {
                             console.log(err);
+                            res.render('partials/error/standaardError.html.twig');
                         } else {
                             sess = req.session;
                             sess.idSpreker = callback;
@@ -429,12 +575,12 @@ router.post('/newSpreker', function (req, res){
                                 Reservering.newMaaltijd(post, function(err, callback){
                                 if(err) {
                                     console.log(err);
-                                    //redirect toevoegen naar error
+                                    res.render('partials/error/standaardError.html.twig');
                                 } else {
                                     Reservering.updateSpreker(post, function(err, callback){
                                         if(err) {
                                             console.log(err);
-                                            //redirect toevoegen naar error
+                                            res.render('partials/error/standaardError.html.twig');
                                         } else {
                                             if(post.maaltijdType == 'maaltijdVrijdag'){
                                                 sess = req.session;
@@ -489,7 +635,6 @@ router.get('/tijdslotZondag', function(req, res){
             }
         })
 });
-
 router.post('/slotKeuze', function(req, res){
    console.log("Keuze doorgegeven");
    var post = {
@@ -511,24 +656,24 @@ router.post('/slotKeuze', function(req, res){
    Spreker.addTag(post, function(err, callback){
         if(err) {
           console.log(err);
-          //redirect toevoegen naar error
+          res.render('partials/error/standaardError.html.twig');
          } else { 
                        Spreker.getSlotStatus(post, function(err, callback){
                             if(err) {
                                 console.log(err);
-                                //redirect toevoegen naar error
+                                res.render('partials/error/standaardError.html.twig');
                             } else {
                                 var status = callback;
                                 if(status == 'Beschikbaar' || status == 'Onder voorbehoud'){
                                     Spreker.occupySlot(post, function(err, callback){
                                     if(err) {
                                         console.log(err);
-                                        //redirect toevoegen naar error
+                                        res.render('partials/error/standaardError.html.twig');
                                     } else {
                                         Spreker.aanvraagPlaatsen(post, function(err, callback){
                                             if(err) {
                                                 console.log(err);
-                                                //redirect toevoegen naar error
+                                               res.render('partials/error/standaardError.html.twig');
                                             } else {
                                                 console.log("Slot keuze gemaakt");
                                                 if(sess.extraKeuze == 1) {
@@ -552,7 +697,6 @@ router.post('/slotKeuze', function(req, res){
          }
    })
 });
-
 router.post('/extraKeuze', function(req, res){
     var post = {
                    idSpreker: sess.idSpreker,
@@ -584,7 +728,6 @@ router.post('/extraKeuze', function(req, res){
         //Scherm redirect naar sucess & bedankt scherm
     }
 });
-
 //Organisator
 //Login
 router.post('/loginUser', function (req, res){ 
@@ -598,6 +741,7 @@ router.post('/loginUser', function (req, res){
         console.log("Callback: " +callback);
         if (err){
             console.log(err);
+            res.render('partials/error/standaardError.html.twig');
         } 
         if(callback == 0){
             res.render('partials/errors/errorLogin.html.twig');
@@ -624,6 +768,7 @@ router.get('/ticketOverzicht', function(req, res){
     Organisator.getTickets(function(err, items){
                 if(err) {
                      console.log(err);
+                    res.render('partials/error/standaardError.html.twig');
                 } else {
                     res.render('partials/ticketOverzicht.html.twig', {
                         bestellingen: items,
@@ -637,6 +782,7 @@ router.get('/bezoekerOverzicht', function(req, res){
     Organisator.getGebruikers(function(err, items){
                 if(err) {
                      console.log(err);
+                     res.render('partials/error/standaardError.html.twig');
                 } else {
                     res.render('partials/bezoekerOverzicht.html.twig', {
                         bezoekers: items,
@@ -644,7 +790,6 @@ router.get('/bezoekerOverzicht', function(req, res){
                 }
     });
 });
-
 //Inchecken
 router.post('/checkinUser', function(req, res){
     var post = {
@@ -690,13 +835,13 @@ router.post('/checkinUser', function(req, res){
         }
     })
 });
-
 //Toekennen sloten
 router.get('/toekennenSloten', function(req,res){
     console.log("Ophalen aanvragen");
     Spreker.getAanvragen(function(err, items){
             if(err) {
                 console.log(err);
+                res.render('partials/error/standaardError.html.twig');
             } else {
                 res.render('partials/toekennen.html.twig', {
                 sprekers: items,
@@ -704,7 +849,6 @@ router.get('/toekennenSloten', function(req,res){
         }
     });
 });
-
 router.post('/slotToekennen', function(req,res){
     var post = {
         idSpreker: req.body.idSpreker,
@@ -715,7 +859,7 @@ router.post('/slotToekennen', function(req,res){
         Organisator.denyRequest(post, function(err, callback){
                 if(err) {
                     console.log(err);
-                    //Error scherm
+                    res.render('partials/error/standaardError.html.twig');
                 } else {
                     console.log("Aanvraag verwijderd");
                     sendgrid.send({
@@ -811,7 +955,6 @@ router.post('/slotToekennen', function(req,res){
 router.get('/pdf', function(req,res){
    res.render('partials/pdfTest.html.twig'); 
 });
-
 router.post('/testPDF', function(req, res){
     var post = {
         hashCode: 'memes',
@@ -850,8 +993,53 @@ router.post('/testPDF', function(req, res){
     });
 });
 router.post('/ReserveringV2', function (req, res){
-    
+    /*
+        Ticketv2
+        id
+        dag
+        ticketStatus
+        hash
+        
+        TicketOrder
+        idTicket
+        idOrder
+        
+        Order
+        id
+        prijs
+        datum
+        email
+        statusOrder
+        
+        MaaltijdOrder
+        maaltijdID
+        orderID
+        
+        Maaltijdv2
+        id
+        dag
+        maaltijdStatus
+        hash
+        maaltijdType
+    */
+    var post = {
+        email: req.body.email,
+        //tickets
+        ticketVrijdag: req.body.ticketVrijdag,
+        ticketZaterdag: req.body.ticketZaterdag,
+        ticketZondag: req.body.ticketZondag,
+        //Lunch
+        lunchVrijdag: req.body.lunchVrijdag,
+        lunchZaterdag: req.body.lunchZaterdag,
+        lunchZondag: req.body.lunchZondag,
+        //Diner
+        dinerZaterdag: req.body.dinerZaterdag,
+        dinerZondag: req.body.dinerZondag,
+        //Weekend&Parse-partout
+        weekend: req.body.weekend,
+        parsepartout: req.body.parsepartout
+    }
+    console.log(post);
 });
-
 
 module.exports = router;

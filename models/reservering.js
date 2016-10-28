@@ -153,11 +153,11 @@ Reservering.getTicketPrice = function(obj, callback){
             return callback(err);
         }
         conn.query(query, [obj.ticketType, obj.prijs], function (err, rows) {
-            if(obj.ticketType == undefined || obj.ticketType == '') {
+            /* if(obj.ticketType == undefined || obj.ticketType == '') {
                 console.log("Undefined, gimme dat errror. ERROR NOG OPLOSSEN");
                 var ticketError = 'leeg';
                 return callback(null, ticketError)
-            }
+            } */
             console.log("ticketType: " + obj.ticketType);
             var prijs = rows[0].prijs;
             console.log(prijs);

@@ -24,6 +24,7 @@
     "nodemailer": "^2.6.4",
     "password-hash": "^1.2.2",
     "pdfkit": "^0.8.0",
+    "pg": "^6.1.0",
     "qr-image": "^3.1.0",
     "sendgrid": "^2.0.0",
     "serve-favicon": "~2.3.0",
