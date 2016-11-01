@@ -7,7 +7,7 @@ var pool = mysql.createPool({
     user: config.user,
     password: config.password,
     database: config.database,
-    port: config.dbport
+   
 });
 
 var connection = function (callback) {
