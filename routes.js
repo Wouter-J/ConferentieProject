@@ -19,7 +19,7 @@ var fs = require('fs');
 var _ = require('underscore');
 var moment = require('moment');
 var PDFDocument = require ('pdfkit');
-var sendgrid = require("sendgrid")("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");
+var sendgrid = require("sendgrid")("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");
 moment().format();
 
 router.get('/qr', function(req, res) {  
