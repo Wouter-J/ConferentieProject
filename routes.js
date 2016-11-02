@@ -13,6 +13,7 @@ var Organisator = require('./models/organisator.js');
 var Feest = require('./models/feest.js');
 var Order = require('./models/order.js');
 
+
 //QR-Stuff
 var qr = require('qr-image');
 var fs = require('fs');
@@ -29,6 +30,10 @@ router.get('/qr', function(req, res) {
 });
 //Index
 router.get('/', function (req, res) {
+    res.render('partials/home.html.twig');
+});
+router.get('/cronJob', function (req, res) {
+    var Order = require('./cronJob.js');
     res.render('partials/home.html.twig');
 });
 //InfoPagina's (Nog vullen & aanmaken)
