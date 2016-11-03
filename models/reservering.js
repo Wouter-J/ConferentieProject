@@ -191,7 +191,18 @@ Reservering.getTicketID = function(obj, callback){
         });
     })
 }; 
-
+Reservering.calculateTotalTickets = function(obj, callback){
+    obj.ticketVrijdag = obj.ticketVrijdag.join("");
+    obj.ticketZaterdag = obj.ticketZaterdag.join("");
+    obj.ticketZondag = obj.ticketZondag.join("");
+    
+    var totaalAantalTickets = (1 * obj.ticketVrijdag) + (1 * obj.ticketZaterdag) + (1 * obj.ticketZondag);
+    console.log(totaalAantalTickets);
+    console.log((obj.ticketVrijdag));
+    console.log((obj.ticketZaterdag));
+    console.log((obj.ticketZondag));
+    return callback(null, totaalAantalTickets);
+}
 Reservering.newOrder = function(obj, callback) {
     var query = "INSERT INTO `Bestelling` VALUES(NULL,?,?,?,?,?)";
         mysql.connection(function (err, conn){

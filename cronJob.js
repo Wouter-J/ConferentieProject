@@ -1,5 +1,9 @@
 var MysqlBackup = function(connectionInfo, filename){
-
+    
+    //Mail
+    var fs = require('fs');
+    var sendgrid = require("sendgrid")("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");
+    
     var Q = require('q');
     var self = this;
     this.backup = '';
@@ -60,7 +64,25 @@ var MysqlBackup = function(connectionInfo, filename){
         // the below is probably excessively terse with its immediate invocation
         return (Q.denodeify(require('fs').writeFile))(filename, self.backup);
     }
-
+    
+    function sendMail(){
+        fs.readFile('./backup_test.txt', function(err, data) {
+                    if(err){
+                        console.log(err);
+                    }
+                sendgrid.send({
+                          to: 'backup@mail.nl',
+                          cc: 'wouter97@planet.nl',
+                          from: 'backup@conferentieStorm.nl',
+                          subject: 'Backup database',
+                          text: 'De backup',
+                          files     : [{filename: 'backup_test.txt', path: './backup_test.txt', content: data, contentType:'application/txt'}]
+                          }, function(err, json) {
+                          if (err) { return console.error(err); }
+                          console.log(json);
+                        });
+             });
+    }
     // with the above all done, now you can actually make the magic happen,
     // starting with the promise-return Q.ninvoke to connect to the DB
     // note that the successive .then()s will be executed iff (if and only
@@ -72,6 +94,7 @@ var MysqlBackup = function(connectionInfo, filename){
     .then(getTables)
     .then(doTableEntries)
     .then(saveFile)
+    .then(sendMail)
     .then( function() {console.log('Success'); } )
     .catch( function(err) {console.log('Something went awry', err); } )
     .finally( function() {self.connection.destroy(); } );

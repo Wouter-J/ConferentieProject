@@ -100,17 +100,16 @@ router.post('/newReservering', function (req, res){
     var output2 = fs.createWriteStream('maaltijd.png');
     code.pipe(output); 
     code2.pipe(output2);
-    ticketVrijdag = req.body.ticketZondag.join("");
-    ticketZaterdag = req.body.ticketZondag.join("");
-    ticketZondag = req.body.ticketZondag.join("");
-    var totaalAantalTickets = (1 * ticketVrijdag) + (1 * ticketZaterdag) + (1 * ticketZondag);
-    console.log(totaalAantalTickets);
+    var ticketVrijdag = req.body.ticketZondag.join("");
+    var ticketZaterdag = req.body.ticketZondag.join("");
+    var ticketZondag = req.body.ticketZondag.join("");
+    var totaalAantalTickets = ''
    var post = {
        email: req.body.email,
        ticketType: req.body.ticketType,
        //ticketID: req.body.ticketID,
        hashCode: passwordHash.generate(req.body.email + req.body.ticketType),
-       QRCode: 'memes.png',
+       QRCode: 'QR.png',
        lunchVrijdag: req.body.lunchVrijdag,
        lunchZaterdag: req.body.lunchZaterdag,
        lunchZondag: req.body.lunchZondag,
@@ -120,90 +119,104 @@ router.post('/newReservering', function (req, res){
        ticketZaterdag: req.body.ticketZaterdag,
        ticketZondag: req.body.ticketZondag,
        totaalAantalTickets: totaalAantalTickets
-       //Deze oplossing kan, weekend & parse-partout zijn dan gewoon korting
     }; 
     console.log(post);
-    Reservering.newOrder(post, function(err, callback){
-        if(err) {
-            console.log(err);
-            res.render('partials/error/betalingError.html.twig');
-        } else {
-            console.log("Ticket toegevoegd");
-                Reservering.getTicketID(post, function(err, callback){
-                if(err) {
-                    console.log(err);
-                    res.render('partials/error/betalingError.html.twig');
+    if(post.ticketType == 'null'){
+        res.render('partials/error/betalingError.html.twig');
+    } else {
+        Reservering.calculateTotalTickets(post, function(err, callback){
+            if(err) {
+                console.log(err);
+                res.render('partials/error/betalingError.html.twig');
+            } else {
+                post.totaalAantalTickets = callback
+                console.log(post.totaalAantalTickets);
+                Reservering.newOrder(post, function(err, callback){
+                    if(err) {
+                        console.log(err);
+                        res.render('partials/error/betalingError.html.twig');
                 } else {
-                   console.log("ticketID: " + callback);
-                    //session list
-                    sess = req.session;
-                    sess.ticketID = callback;
-                    sess.hashCode = passwordHash.generate(req.body.email + req.body.ticketType);
-                    sess.ticketType = req.body.ticketType;
-                    sess.ticketVrijdag = req.body.ticketVrijdag;
-                    sess.ticketZaterdag = req.body.ticketZaterdag;
-                    sess.ticketZondag = req.body.ticketZondag;
-                    sess.maaltijdType = req.body.maaltijdType;
-                    sess.lunchVrijdag=  req.body.lunchVrijdag;
-                    sess.lunchZaterdag= req.body.lunchZaterdag;
-                    sess.lunchZondag= req.body.lunchZondag;
-                    sess.dinerZaterdag =req.body.dinerZaterdag;
-                    sess.dinerZondag = req.body.dinerZondag;
-                    sess.email = req.body.email;
-                    
-                   var post = {
-                       email: sess.email,
-                       ticketID: sess.ticketID,
-                       maaltijdType: req.body.maaltijdType,
-                       ticketType: req.body.ticketType,
-                       aantalvrij: '',
-                       lunchVrijdag: req.body.lunchVrijdag,
-                       lunchZaterdag: req.body.lunchZaterdag,
-                       lunchZondag: req.body.lunchZondag,
-                       dinerZaterdag:req.body.dinerZaterdag,
-                       dinerZondag: req.body.dinerZondag,
-                        //Ticket time
-                       ticketVrijdag: req.body.ticketVrijdag,
-                       ticketZaterdag: req.body.ticketZaterdag,
-                       ticketZondag: req.body.ticketZondag,
-                   };
-                   console.log(sess.ticketID);
-                        Reservering.newMaaltijd(post, function(err, callback){
-                        if(err) {
-                            console.log(err);
-                            res.render('partials/error/betalingError.html.twig');
-                        } else {
-                            console.log("Maaltijd order toegevoegd");
-                            Reservering.newTicket(post, function(err, callback){
+                console.log("Ticket toegevoegd");
+                    Reservering.getTicketID(post, function(err, callback){
+                    if(err) {
+                        console.log(err);
+                        res.render('partials/error/betalingError.html.twig');
+                    } else {
+                       console.log("ticketID: " + callback);
+                        //session list
+                        sess = req.session;
+                        sess.ticketID = callback;
+                        sess.hashCode = passwordHash.generate(req.body.email + req.body.ticketType);
+                        sess.ticketType = req.body.ticketType;
+                        sess.ticketVrijdag = req.body.ticketVrijdag;
+                        sess.ticketZaterdag = req.body.ticketZaterdag;
+                        sess.ticketZondag = req.body.ticketZondag;
+                        sess.maaltijdType = req.body.maaltijdType;
+                        sess.lunchVrijdag=  req.body.lunchVrijdag;
+                        sess.lunchZaterdag= req.body.lunchZaterdag;
+                        sess.lunchZondag= req.body.lunchZondag;
+                        sess.dinerZaterdag =req.body.dinerZaterdag;
+                        sess.dinerZondag = req.body.dinerZondag;
+                        sess.email = req.body.email;
+
+                       var post = {
+                           email: sess.email,
+                           ticketID: sess.ticketID,
+                           maaltijdType: req.body.maaltijdType,
+                           ticketType: req.body.ticketType,
+                           aantalvrij: '',
+                           lunchVrijdag: req.body.lunchVrijdag,
+                           lunchZaterdag: req.body.lunchZaterdag,
+                           lunchZondag: req.body.lunchZondag,
+                           dinerZaterdag:req.body.dinerZaterdag,
+                           dinerZondag: req.body.dinerZondag,
+                            //Ticket time
+                           ticketVrijdag: req.body.ticketVrijdag,
+                           ticketZaterdag: req.body.ticketZaterdag,
+                           ticketZondag: req.body.ticketZondag,
+                       };
+                       console.log(sess.ticketID);
+                            Reservering.newMaaltijd(post, function(err, callback){
                             if(err) {
                                 console.log(err);
                                 res.render('partials/error/betalingError.html.twig');
                             } else {
-                                console.log("Ticket order toegevoegd");
-                                res.redirect('/betalen');
-                               /* Reservering.checkFreeTickets(post, function(err, callback){
-                                        if(err) {
-                                            console.log(err);
-                                            //redirect toevoegen naar error
-                                        } 
-                                        if(callback == 'leeg'){
-                                            console.log("Niks ingevuld");
-                                        }
-                                        else {
-                                            var session = post.ticketID
-                                            console.log("Tickets gechecked " + callback);
-                                            res.redirect('/betalen');
-                                        }
-                                    }) */     
+                                console.log("Maaltijd order toegevoegd");
+                                Reservering.newTicket(post, function(err, callback){
+                                if(err) {
+                                    console.log(err);
+                                    res.render('partials/error/betalingError.html.twig');
+                                } else {
+                                    console.log("Ticket order toegevoegd");
+                                    res.redirect('/betalen');
+                                   /* Reservering.checkFreeTickets(post, function(err, callback){
+                                            if(err) {
+                                                console.log(err);
+                                                //redirect toevoegen naar error
+                                            } 
+                                            if(callback == 'leeg'){
+                                                console.log("Niks ingevuld");
+                                            }
+                                            else {
+                                                var session = post.ticketID
+                                                console.log("Tickets gechecked " + callback);
+                                                res.redirect('/betalen');
+                                            }
+                                        }) */     
                                 }
+                                })
+                            }
                             })
-                        }
-                    }) 
+                    }
+                    })
                 }
-            });
-        }
-    });
+                })
+            }
+        })
+    }
 });
+
+                    
  //Betaling bevestigen
 router.get('/betalen', function(req, res){
     console.log("Prijs Berekening"); 
