@@ -16,7 +16,7 @@ var Spreker = function(){
 }
 
 Spreker.newSpreker = function(obj, callback) {
-    var query = "INSERT INTO `spreker` VALUES(NULL,?,?,?,?,?,?,?,?,?,?)";
+    var query = "INSERT INTO `Spreker` VALUES(NULL,?,?,?,?,?,?,?,?,?,?)";
     mysql.connection(function (err, conn) {
         if (err) {
             return callback(err);
