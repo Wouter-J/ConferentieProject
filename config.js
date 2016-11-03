@@ -5,6 +5,7 @@ module.exports = {
     "password": "myR6XCKIh5",
     "dbport": 3306,
     "port":  process.env.PORT || 3000,
+    "max-connections": 250
 };
 
 /* 

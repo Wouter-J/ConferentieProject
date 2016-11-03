@@ -13,7 +13,6 @@ var Organisator = require('./models/organisator.js');
 var Feest = require('./models/feest.js');
 var Order = require('./models/order.js');
 
-
 //QR-Stuff
 var qr = require('qr-image');
 var fs = require('fs');
@@ -23,11 +22,6 @@ var PDFDocument = require ('pdfkit');
 var sendgrid = require("sendgrid")("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");
 moment().format();
 
-router.get('/qr', function(req, res) {  
-  var code = qr.image(new Date().toString(), { type: 'svg' });
-  res.type('svg');
-  code.pipe(res);
-});
 //Index
 router.get('/', function (req, res) {
     res.render('partials/home.html.twig');
@@ -86,6 +80,7 @@ router.get('/agenda', function (req, res) { //geen klant
         Tijdslot.getSloten(function(err, items2){
             if(err){
                 console.log(err);
+                 res.render('partials/error/standaardError.html.twig');
             } else {
                 res.render('partials/agenda.html.twig', {tijdslot_items: items2});
             }
@@ -336,17 +331,20 @@ router.post('/confirmOrder', function(req,res){
    Reservering.getTicketID(post, function(err, callback){  
             if(err){
                 console.log(err);
+                 res.render('partials/error/standaardError.html.twig');
             } else {
                 var post = {ticketID: callback}
                 console.log("Start PDF");
                 Reservering.createPDF(post, function(err, items2){
                         if(err){
                             console.log(err);
+                             res.render('partials/error/standaardError.html.twig');
                         } else {
                          setTimeout(function(){
                             fs.readFile('./test.pdf', function(err, data) {
                                 if(err){
                                     console.log(err);
+                                     res.render('partials/error/standaardError.html.twig');
                                 }
                                 console.log(data);
                                 sendgrid.send({
@@ -396,7 +394,7 @@ router.post('/cancelReservering', function(req, res){
                         res.render('partials/error/standaardError.html.twig');
                     } else {
                         console.log("Order destroy >.<");
-                        //VERWIJDER EN ERROR SCHERM TOEVOEGEN, OOK CHECK OF BESTAAT, ALS TICKET NIET BESTAAT DAN NIKS DOEN
+                        res.render('partials/sucess/annuleerSucess.html.twig');
                     }
                 })
         }
@@ -408,6 +406,7 @@ router.get('/feest', function (req, res) {
     Feest.getInfo(function(err, items){
             if(err){
                 console.log(err);
+                res.render('partials/error/standaardError.html.twig');
             } else {
                 res.render('partials/feestOrder.html.twig', {feest_items: items});
             }
@@ -449,10 +448,12 @@ router.get('/feestTickets', function(req, res){
     Feest.getMaxTickets(post, function(err, items){
             if(err){
                 console.log(err);
+                res.render('partials/error/standaardError.html.twig');
             } else {
                 Feest.getMaxTickets(post, function(err, items){
                     if(err){
                         console.log(err);
+                        res.render('partials/error/standaardError.html.twig');
                     } else {
                         res.render('partials/feestTickets.html.twig', {feest_items: items});
                     }
@@ -630,6 +631,7 @@ router.get('/tijdslotVrijdag', function(req, res){
     Tijdslot.getSlotsFriday(function(err, items2){
             if(err){
                 console.log(err);
+                res.render('partials/error/standaardError.html.twig');
             } else {
                 res.render('partials/tijdslotVrijdag.html.twig', {slot_items: items2});
             }
@@ -639,6 +641,7 @@ router.get('/tijdslotZaterdag', function(req, res){
     Tijdslot.getSlotsSaturday(function(err, items2){
             if(err){
                 console.log(err);
+                res.render('partials/error/standaardError.html.twig');
             } else {
                 res.render('partials/tijdslotZaterdag.html.twig', {slot_items: items2});
             }
@@ -648,6 +651,7 @@ router.get('/tijdslotZondag', function(req, res){
     Tijdslot.getSlotsSunday(function(err, items2){
             if(err){
                 console.log(err);
+                res.render('partials/error/standaardError.html.twig');
             } else {
                 res.render('partials/tijdslotZondag.html.twig', {slot_items: items2});
             }
@@ -899,6 +903,7 @@ router.post('/slotToekennen', function(req,res){
         Spreker.getAanvraag(post, function(err, callback){
             if(err){
                 console.log(err);
+                res.render('partials/error/standaardError.html.twig');
             } else {
                 //Variable time
                 var idSpreker = callback[0].idSpreker;
@@ -934,19 +939,19 @@ router.post('/slotToekennen', function(req,res){
                 Organisator.allowRequest(post, function(err, callback){
                         if(err) {
                             console.log(err);
-                            //Error scherm
+                            res.render('partials/error/standaardError.html.twig');
                         } else {
                             Organisator.takeSlot(post, function(err, callback){
                             if(err) {
                                 console.log(err);
-                                //Error scherm
+                                res.render('partials/error/standaardError.html.twig');
                             } else {
                             console.log("Aanvraag toegevoegd aan agenda");
                             var post = { idSpreker: idSpreker}
                             Organisator.denyRequest(post, function(err, callback){
                                 if(err) {
                                     console.log(err);
-                                    //Error scherm
+                                    res.render('partials/error/standaardError.html.twig');
                                 } else {
                                     console.log("Aanvraag verwijderd");
                                     sendgrid.send({
@@ -982,11 +987,13 @@ router.post('/testPDF', function(req, res){
     Reservering.createPDF(post, function(err, items2){
             if(err){
                 console.log(err);
+                res.render('partials/error/standaardError.html.twig');
             } else {
              setTimeout(function(){
                             fs.readFile('./test.pdf', function(err, data) {
                                 if(err){
                                     console.log(err);
+                                    res.render('partials/error/standaardError.html.twig');
                                 }
                                     console.log(data);
                                 sendgrid.send({
