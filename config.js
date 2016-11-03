@@ -1,4 +1,4 @@
-/* module.exports = {
+module.exports = {
     "host": "sql7.freesqldatabase.com",
     "database": "sql7142604",
     "user": "sql7142604",
@@ -7,8 +7,8 @@
     "port":  process.env.PORT || 3000,
     "max-connections": 250
 };
-*/
 
+/* 
 //Local
 module.exports = {
     "database": "mydb",
@@ -17,3 +17,4 @@ module.exports = {
     "dbport": 3306,
     "port":  process.env.PORT || 3000,
 };
+*/
