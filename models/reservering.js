@@ -180,7 +180,7 @@ Reservering.getTicketID = function(obj, callback){
         }
         conn.query(query, [obj.email, obj.ticketID], function (err, rows) {
             console.log("Email: " + obj.email);
-            var ticketID = rows[0].ticketID;
+            var ticketID = obj.ticketID;
             console.log(ticketID);
             if (err) {
                 console.log("err");

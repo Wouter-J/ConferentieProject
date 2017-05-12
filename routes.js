@@ -282,7 +282,7 @@ router.get('/betalen', function(req, res){
             }
             var foodSolution = dinerSolution + lunchSolution;
             var completePrice = foodSolution + solution;
-
+            console.log(completePrice);
             res.render('partials/betalen.html.twig', {
                 solution: solution, 
                 priceTicket: priceTicket, 
@@ -700,7 +700,7 @@ router.post('/slotKeuze', function(req, res){
                                                 console.log("Slot keuze gemaakt");
                                                 if(sess.extraKeuze == 1) {
                                                     console.log("Tweede keuze al doorgegeven");
-                                                    //Bedank scherm
+                                                 res.render('partials/error/sprekerBedankt.html.twig');
                                                 } else {
                                                     res.redirect('/extraKeuze');
                                                 }
@@ -747,7 +747,7 @@ router.post('/extraKeuze', function(req, res){
     }
     if(post.keuze == 'Nee'){
         console.log("Nee");
-        //Scherm redirect naar sucess & bedankt scherm
+        res.render('partials/error/sprekerBedankt.html.twig');
     }
 });
 //Organisator
