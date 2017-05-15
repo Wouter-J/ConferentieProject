@@ -31,8 +31,6 @@ index e69de29..f27a94d 100644
 +  - "**.rb"
 +exclude_paths:
 +- node_modules/
-+- bower_components/
-+- Documenten/
 +- spec/
 diff --git a/.csslintrc b/.csslintrc
 index e69de29..aacba95 100644
