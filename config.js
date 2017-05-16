@@ -11,6 +11,7 @@ module.exports = {
 
 //Local
 module.exports = {
+    "host": process.env.host,
     "database": process.env.dbName,
     "user": process.env.dbUser,
     "password": process.envdbPwd,
