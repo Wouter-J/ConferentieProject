@@ -82,6 +82,7 @@ router.get('/agenda', function (req, res) { //geen klant
     console.log(process.env.dbName);
     console.log(process.env.dbUser);
     console.log(process.env.dbPwd);
+    console.log(process.env.PORT);
         Tijdslot.getSloten(function(err, items2){
             if(err){
                 console.log(err);
