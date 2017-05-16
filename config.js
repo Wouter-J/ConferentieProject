@@ -9,12 +9,19 @@ module.exports = {
     "max-connections": 250
 }; */
 
-
-//Local
 module.exports = {
     "database": "mydb",
     "user": "root",
     "password": "",
+    "dbport": 3306,
+    "port":  process.env.PORT || 3000,
+};
+
+//Local
+module.exports = {
+    "database": process.env.dbName,
+    "user": process.env.dbUser,
+    "password": process.envdbPwd,
     "dbport": 3306,
     "port":  process.env.PORT || 3000,
 };
