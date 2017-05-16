@@ -40,5 +40,5 @@
     app.listen(port, function(){
         console.log('----======<<< STARTED ON PORT: ' + port + ' >>>======----');
     });
-    console.log(process.env.dbName);
+
     module.exports = app;

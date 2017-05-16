@@ -9,7 +9,6 @@ module.exports = {
     "max-connections": 250
 }; */
 
-//Local
 module.exports = {
     "host": process.env.host,
     "database": process.env.dbName,
@@ -18,4 +17,3 @@ module.exports = {
     "dbport": 3306,
     "port":  process.env.PORT || 3000,
 };
-
