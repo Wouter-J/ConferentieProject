@@ -18,4 +18,3 @@ module.exports = {
     "port":  process.env.PORT || 3000,
 };
 
-console.log(process.env.dbName);

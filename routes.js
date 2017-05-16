@@ -78,6 +78,7 @@ router.get('/feestMail', function(req,res){
 //Agenda
 router.get('/agenda', function (req, res) { //geen klant
     console.log("Agenda geactiveerd");
+    console.log(process.env.dbName);
         Tijdslot.getSloten(function(err, items2){
             if(err){
                 console.log(err);
