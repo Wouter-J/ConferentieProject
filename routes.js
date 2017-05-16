@@ -12,6 +12,7 @@ var Reservering = require('./models/reservering.js');
 var Organisator = require('./models/organisator.js');
 var Feest = require('./models/feest.js');
 var Order = require('./models/order.js');
+var Test = require('./tests/newTest.js');
 
 //QR-Stuff
 var qr = require('qr-image');
@@ -1017,54 +1018,24 @@ router.post('/testPDF', function(req, res){
             }
     });
 });
-router.post('/ReserveringV2', function (req, res){
-    /*
-        Ticketv2
-        id
-        dag
-        ticketStatus
-        hash
-        
-        TicketOrder
-        idTicket
-        idOrder
-        
-        Order
-        id
-        prijs
-        datum
-        email
-        statusOrder
-        
-        MaaltijdOrder
-        maaltijdID
-        orderID
-        
-        Maaltijdv2
-        id
-        dag
-        maaltijdStatus
-        hash
-        maaltijdType
-    */
-    var post = {
-        email: req.body.email,
-        //tickets
-        ticketVrijdag: req.body.ticketVrijdag,
-        ticketZaterdag: req.body.ticketZaterdag,
-        ticketZondag: req.body.ticketZondag,
-        //Lunch
-        lunchVrijdag: req.body.lunchVrijdag,
-        lunchZaterdag: req.body.lunchZaterdag,
-        lunchZondag: req.body.lunchZondag,
-        //Diner
-        dinerZaterdag: req.body.dinerZaterdag,
-        dinerZondag: req.body.dinerZondag,
-        //Weekend&Parse-partout
-        weekend: req.body.weekend,
-        parsepartout: req.body.parsepartout
-    }
-    console.log(post);
+
+/* Checks */
+router.get('/tests', function (req, res) { //geen klant
+    console.log("test geactiveerd");
+        Test.testSloten(function(err, callback, result){
+            if(err){
+                console.log(err);
+                 res.render('partials/error/standaardError.html.twig');
+            } else {
+                console.log('yay');
+                console.log(callback);
+                var items = {
+                    "test1": result,
+                }
+                console.log(items);
+                res.render('partials/testResults.html.twig', {tijdslot_items: items});
+            }
+        })
 });
 
 module.exports = router;
