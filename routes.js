@@ -1035,7 +1035,7 @@ router.get('/tests', function (req, res) { //geen klant
                 console.log('yay');
                 console.log(callback);
                 var items = {
-                    "test1": result,
+                    "test1": callback,
                 }
                 console.log(items);
                 res.render('partials/testResults.html.twig', {tijdslot_items: items});

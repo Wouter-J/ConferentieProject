@@ -4,20 +4,36 @@
     
 <head>
  <!-- Stylesheets -->
-    <link href="/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="/stylesheets/main.css" rel="stylesheet">
     
     <!-- Library Scripts -->
-    <script src="/jquery/dist/jquery.min.js"></script>
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
 </head>
 <h3></h3>
     <body>
         <div class ="container">
-                {% for tijdslot in tijdslot_items %}
-                      <tr>
-                        <td>{{tijdslot}}</td>  
-                     </tr>
+                <div id="testResults" style="display: none;">
+                    {% for tijdslot in tijdslot_items %}
+                          <tr>
+                            <td>{{tijdslot}}</td>
+                         </tr>
                     {% endfor %}
+                </div>
+                <div id="alertName" class="alert alert-success" style="display: none">
+                    <strong>Success!</strong> De database is werkend
+                </div>
         </div>
 </body>
+    <script>
+    $(document).ready(function(){
+        var x = document.getElementById("testResults");
+        console.log(x);
+        
+        if(x != null){
+             $('#alertName').css("display", "block");
+             $('#alertDescription').css("display", "block");
+        }
+    });
+</script>
 {% endblock %}

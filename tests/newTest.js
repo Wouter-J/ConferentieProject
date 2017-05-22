@@ -1,5 +1,6 @@
 var Test = function () {}
 
+var mysql = require('../db.js');
 var Tijdslot = require('../models/tijdslot.js');
 
 Test.testSloten = function(callback) {
