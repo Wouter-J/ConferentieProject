@@ -33,7 +33,7 @@
     "serve-favicon": "^2.5.0",
     "session": "^0.1.0",
     "twig": "^1.13.3",
-    "underscore": "^1.8.3"
+    "underscore": "^1.12.1"
   },
   "devDependencies": {
     "chai": "^3.5.0"
